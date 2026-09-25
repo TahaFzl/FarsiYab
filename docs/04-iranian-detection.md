@@ -11,6 +11,9 @@
 | `explicit_keyword` | کلمات صریح در نام، توضیحات یا بیو | Persian, Iranian, Farsi, ایرانی, فارسی, «فارسی صحبت می‌کنیم», "We speak Farsi" | ۰٫۶ |
 | `osm_cuisine_tag` | برچسب OSM | `cuisine=persian`, `cuisine=iranian` | ۰٫۷ |
 | `google_type_persian` | نوع مکان در Google | `persian_restaurant` (در صورت وجود در Places API New) | ۰٫۷ |
+| `overture_persian_category` | دسته در Overture | `taxonomy.primary = persian_restaurant` | ۰٫۷ |
+| `website_persian_content` | متن فارسی یا `lang="fa"` در وب‌سایت خود کسب‌وکار | | ۰٫۵ |
+| `registry_language_farsi` | «Farsi» یا «Persian» در زبان‌های پزشک در رجیستری رسمی | [professional-registries.md](sources/professional-registries.md) | ۰٫۸ |
 | `persian_script_name` | نام با حروف فارسی (نه عربی) | «نان‌وایی تهران» | ۰٫۵ |
 | `persian_script_text` | متن فارسی در توضیحات یا پست‌ها | بیوی اینستاگرام به فارسی | ۰٫۴ |
 | `iranian_place_name` | اسم شهر یا نماد ایرانی در نام | Shiraz, Tehran, Isfahan, Tabriz, Pars, Persepolis, Caspian, Zagros | ۰٫۳ |
@@ -49,6 +52,9 @@ score = score × (1 − w_neg) برای هر نشانه‌ی منفی
 - **نشانه‌ی قطعی فارسی:** وجود هر یک از حروف `پ چ ژ گ` (U+067E، U+0686، U+0698، U+06AF)
 - **نشانه‌ی قوی:** استفاده از `ی` فارسی (U+06CC) و `ک` فارسی (U+06A9) به‌جای `ي` (U+064A) و `ك` (U+0643)، یا وجود نیم‌فاصله (U+200C)
 - **نشانه‌ی عربی:** `ة`، `ى` و ال تعریف پرتکرار
+- **پشتو (افغانستان/پاکستان):** حروف `ټ ډ ړ ږ ښ ګ ڼ ې ۍ` (مثلاً «افغان د چرګانو فارم» در تست Overture که به خاطر «چ» اشتباهاً فارسی تشخیص داده شد)
+- **اردو:** حروف `ٹ ڈ ڑ ں ے ھ` (مثلاً «قومی آواز»)
+- اگر حروف پشتو یا اردو وجود داشته باشد، `persian_script_name` حساب **نمی‌شود**
 - اگر متن کوتاه‌تر از ۱۵ کاراکتر باشد و هیچ نشانه‌ی قطعی نداشته باشد: وزن نصف می‌شود
 
 علاوه بر این قواعد، یک language detector (مثل fastText lid.176، رایگان) روی متن‌های بلندتر اجرا می‌شود.
@@ -62,6 +68,15 @@ score = score × (1 − w_neg) برای هر نشانه‌ی منفی
 - `persian_foods.txt`: غذاها با نویسه‌گردانی‌های مختلف (koobideh / kubideh / koubideh)
 - `surname_suffixes.txt`: الگوهای نام خانوادگی
 - `negative_keywords.txt`
+
+## مثبت‌های کاذب مشاهده‌شده (تست Overture، تورنتو، ۲۰۲۶-۰۹)
+
+| مورد | مشکل | راه‌حل |
+|---|---|---|
+| «Persian Rugs Canada» و ده‌ها فرش‌فروشی دیگر | «Persian» صفت محصول است، نه نشانه‌ی صاحب کسب‌وکار | عبارت‌های `persian rug`، `persian carpet` و `persian cat` در `negative_keywords` وزن `explicit_keyword` را به ۰٫۲ کاهش می‌دهند؛ این کسب‌وکارها فقط با نشانه‌ی دیگر (متن فارسی در سایت و ...) نمایش داده می‌شوند. البته بسیاری از فرش‌فروشی‌ها ایرانی هستند، پس حذف کامل نمی‌شوند. |
+| «Cars With Shirazi» (نمایندگی BMW) | Shirazi نام خانوادگی یک فرد است، نه نام شهر | `iranian_place_name` فقط برای شکل‌های Shiraz، Tehran و ... حساب می‌شود، نه برای شکل صفتی/نام خانوادگی (Shirazi، Tehrani) که به `persian_personal_name` (وزن ۰٫۲) می‌رود |
+| «Kingsway Persian Rugs» با وب‌سایت homestars.com | وب‌سایت ثبت‌شده مال یک دایرکتوری است | فهرست `non_business_domains` |
+| صرافی‌های افغانستانی با نام «صرافی ...» | فارسی (دری) است ولی ایرانی نیست | طبق تعریف بالا نمایش داده می‌شوند؛ اگر نشانه‌ی «Afghan» باشد، برچسب «فارسی‌زبان» می‌گیرند نه «ایرانی» |
 
 ## ملاحظات
 

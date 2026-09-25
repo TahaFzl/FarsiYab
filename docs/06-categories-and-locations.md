@@ -4,19 +4,21 @@
 
 هر دسته به نوع‌های معادل در هر سورس نگاشت می‌شود. این نگاشت در `data/categories.yaml` نگهداری می‌شود.
 
-| slug | فارسی | OSM tags | Google Places (New) types | کلیدواژه‌ی جست‌وجوی وب |
-|---|---|---|---|---|
-| `restaurant` | رستوران و کافه | `amenity=restaurant\|cafe\|fast_food` | `restaurant`, `cafe`, `persian_restaurant`* | Persian restaurant, رستوران ایرانی |
-| `grocery` | سوپرمارکت و فروشگاه مواد غذایی | `shop=supermarket\|convenience\|greengrocer\|deli` | `grocery_store`, `supermarket` | Persian grocery, سوپرمارکت ایرانی |
-| `bakery` | نانوایی و شیرینی‌فروشی | `shop=bakery\|pastry\|confectionery` | `bakery` | Persian bakery, شیرینی ایرانی |
-| `doctor` | پزشک | `amenity=doctors\|clinic`, `healthcare=*` | `doctor`, `medical_clinic` | Farsi speaking doctor, دکتر ایرانی |
-| `doctor/dentist` | دندان‌پزشک | `amenity=dentist` | `dentist` | Farsi speaking dentist |
-| `lawyer` | وکیل و مهاجرت | `office=lawyer` | `lawyer` | Iranian lawyer, وکیل ایرانی |
-| `real_estate` | مشاور املاک | `office=estate_agent` | `real_estate_agency` | Persian realtor |
-| `beauty` | آرایشگاه و زیبایی | `shop=hairdresser\|beauty` | `beauty_salon`, `hair_salon` | آرایشگاه ایرانی |
-| `accounting` | حسابداری و مالیات | `office=accountant` | `accounting` | Iranian accountant |
-| `education` | آموزش و کلاس فارسی | `amenity=school\|language_school` | `school` | Persian school, کلاس فارسی |
-| `other` | سایر | — | — | — |
+| slug | فارسی | Overture `basic_category` | OSM tags | Google Places (New) types (اختیاری) | کلیدواژه‌ی جست‌وجوی وب (اختیاری) |
+|---|---|---|---|---|---|
+| `restaurant` | رستوران و کافه | `restaurant`, `fast_food_restaurant`, `cafe`, `food_service` | `amenity=restaurant\|cafe\|fast_food` | `restaurant`, `cafe`, `persian_restaurant`* | Persian restaurant, رستوران ایرانی |
+| `grocery` | سوپرمارکت و فروشگاه مواد غذایی | `food_and_beverage_store`, `superstore` | `shop=supermarket\|convenience\|greengrocer\|deli` | `grocery_store`, `supermarket` | Persian grocery, سوپرمارکت ایرانی |
+| `bakery` | نانوایی و شیرینی‌فروشی | `food_and_beverage_store` (+ taxonomy `bakery`) | `shop=bakery\|pastry\|confectionery` | `bakery` | Persian bakery, شیرینی ایرانی |
+| `doctor` | پزشک | `medical_service`, `health_care`, `primary_care_or_general_clinic`, `specialized_health_care`, `walk_in_clinic`, `pediatric_clinic`, `behavioral_or_mental_health_clinic` | `amenity=doctors\|clinic`, `healthcare=*` | `doctor`, `medical_clinic` | Farsi speaking doctor, دکتر ایرانی |
+| `doctor/dentist` | دندان‌پزشک | `dental_clinic` | `amenity=dentist` | `dentist` | Farsi speaking dentist |
+| `lawyer` | وکیل و مهاجرت | `attorney_or_law_firm` | `office=lawyer` | `lawyer` | Iranian lawyer, وکیل ایرانی |
+| `real_estate` | مشاور املاک | `real_estate_service` | `office=estate_agent` | `real_estate_agency` | Persian realtor |
+| `beauty` | آرایشگاه و زیبایی | `personal_or_beauty_service`, `personal_care_and_beauty_store` | `shop=hairdresser\|beauty` | `beauty_salon`, `hair_salon` | آرایشگاه ایرانی |
+| `accounting` | حسابداری و مالیات | `financial_service` | `office=accountant` | `accounting` | Iranian accountant |
+| `education` | آموزش و کلاس فارسی | `specialty_school`, `tutoring_service` | `amenity=school\|language_school` | `school` | Persian school, کلاس فارسی |
+| `other` | سایر | بقیه | — | — | — |
+
+مقادیر `basic_category` از داده‌ی واقعی تورنتو (release `2026-08-19.0`) استخراج شده‌اند. برای رستوران‌ها، `taxonomy.primary = persian_restaurant` در release `2026-09-23.1` وجود دارد (۵۴ مورد در تورنتو). قبل از پیاده‌سازی، لیست کامل taxonomy از مستندات Overture گرفته شود.
 
 \* قبل از استفاده، وجود نوع `persian_restaurant` در لیست رسمی types نسخه‌ی New بررسی شود. اگر وجود نداشت، از `restaurant` به همراه `textQuery="Persian restaurant"` استفاده می‌شود.
 

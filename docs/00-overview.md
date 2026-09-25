@@ -38,14 +38,14 @@ flowchart LR
 رستوران شیراز — Shiraz Kitchen                  اطمینان: بالا ●●●
 📍 123 Yonge St, Toronto
 🏷 رستوران
-🔎 سورس‌ها: OpenStreetMap · Google Maps · Instagram
+🔎 سورس‌ها: Facebook (از طریق Overture) · OpenStreetMap · Instagram · وب‌سایت
 
 چرا ایرانی؟
+  • دسته‌ی persian_restaurant در Overture Maps      ← [لینک صفحه‌ی فیس‌بوک]
   • برچسب cuisine=persian در OpenStreetMap        ← [لینک]
-  • بیوی اینستاگرام: «غذای اصیل ایرانی»           ← [لینک]
-  • غذاهای ایرانی در منو (کوبیده، قرمه‌سبزی)       ← [لینک]
+  • غذاهای ایرانی در منوی وب‌سایت (کوبیده، قرمه‌سبزی) ← [لینک]
 
-[گزارش اشتباه]
+[دیدن روی Google Maps]   [گزارش اشتباه]
 ```
 
 ## خارج از محدوده (فعلاً)

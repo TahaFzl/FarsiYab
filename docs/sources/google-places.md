@@ -1,7 +1,33 @@
-# Google Places API (New)
+# Google (Maps URLs و Places API)
+
+این فایل دو بخش دارد:
+1. **Google Maps URLs:** بدون کلید و بدون حساب؛ ✅ در MVP استفاده می‌شود
+2. **Google Places API:** نیاز به حساب و کارت بانکی دارد؛ ⏸ **اختیاری** ([ADR-005](../decisions/005-no-account-sources-first.md))
+
+## Google Maps URLs (بدون کلید)
+
+- **شناسه در کد:** `google_maps_link` (سورس داده نیست؛ فقط لینک ساخته می‌شود)
+- **مستندات:** https://developers.google.com/maps/documentation/urls/get-started
+- **حساب کاربری یا کلید:** ❌ لازم نیست. طبق مستندات گوگل، Maps URLs رایگان هستند و کلید نمی‌خواهند.
+
+برای هر نتیجه، یک دکمه‌ی **«دیدن روی Google Maps»** ساخته می‌شود:
+
+```
+https://www.google.com/maps/search/?api=1&query=<نام کسب‌وکار + آدرس، URL-encoded>
+```
+
+مثلاً: `https://www.google.com/maps/search/?api=1&query=Sina%20Persian%20Grill%2C%20Toronto`
+
+با این لینک، کاربر نظرات، عکس‌ها و ساعت کاری را مستقیماً در گوگل می‌بیند و ما هیچ داده‌ای از گوگل نمی‌گیریم یا ذخیره نمی‌کنیم. **محدودیت:** این لینک به‌عنوان «سورس کشف» حساب نمی‌شود و در بخش «سورس‌ها» هم نمایش داده نمی‌شود. فقط یک لینک کمکی برای بررسی است.
+
+**نکته‌ی قانونی مهم:** گرفتن داده از صفحه‌ی نتایج Google Maps با برنامه (اسکرپینگ) ممنوع است ([rejected.md](rejected.md)). فقط **لینک دادن** مجاز است.
+
+---
+
+## Google Places API (New) — اختیاری
 
 - **شناسه در کد:** `google_places`
-- **وضعیت:** ✅ MVP با سقف سخت مصرف
+- **وضعیت:** ⏸ اختیاری؛ فقط در صورتی که حساب Google Cloud ساخته شود
 - **نوع دسترسی:** API رسمی (همان داده‌ی Google Maps)
 - **مستندات:** https://developers.google.com/maps/documentation/places/web-service/op-overview
 - **قیمت و سهمیه:** https://developers.google.com/maps/documentation/places/web-service/usage-and-billing

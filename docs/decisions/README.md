@@ -8,11 +8,12 @@
 | [002](002-official-apis-only.md) | فقط API رسمی و صفحات عمومی مجاز؛ بدون اسکرپینگ | پذیرفته |
 | [003](003-free-tier-only.md) | فقط سرویس‌های رایگان با سقف سخت مصرف | پذیرفته |
 | [004](004-tech-stack.md) | Next.js + Python (FastAPI) + PostgreSQL، دوزبانه | پذیرفته |
+| [005](005-no-account-sources-first.md) | اول سورس‌هایی که حساب کاربری نمی‌خواهند (Overture، OSM، وب‌سایت‌ها) | پذیرفته |
 
 ## سؤال‌های باز
 
 - [ ] **نام دامنه** (مثلاً farsiyab.com)؛ برای User-Agent کراولر و ثبت اپ Meta لازم است
-- [ ] **حساب‌ها:** ساخت حساب Google Cloud (نیاز به کارت بانکی حتی برای سهمیه‌ی رایگان)، حساب Brave Search API (نیاز به کارت) و حساب Instagram Business + Facebook Page + Meta App. به دلیل تحریم‌ها، ممکن است حساب و کارت بانکی خارج از ایران لازم باشد.
+- [x] ~~حساب‌ها~~: طبق [ADR-005](005-no-account-sources-first.md) برای MVP لازم نیست. فقط اگر بعداً سورس‌های اختیاری (Google Places، Brave، Instagram Business Discovery) خواسته شوند، ساخت حساب لازم می‌شود.
 - [ ] **دایرکتوری‌های ایرانی:** لیست دایرکتوری‌هایی که می‌شناسید، برای بررسی ([community-directories.md](../sources/community-directories.md))
 - [ ] **شهرهای MVP:** لیست پیشنهادی در [06](../06-categories-and-locations.md) تأیید یا اصلاح شود
 - [ ] **سرور:** محل میزبانی (اروپا به خاطر GDPR پیشنهاد می‌شود)

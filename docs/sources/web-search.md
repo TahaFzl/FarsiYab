@@ -1,7 +1,7 @@
 # جست‌وجوی وب (Brave Search API)
 
 - **شناسه در کد:** `brave_search` (نتایج بر اساس دامنه‌ی مقصد به سورس‌های `instagram`، `facebook`، `website` یا `directory:*` نسبت داده می‌شوند)
-- **وضعیت:** ✅ MVP
+- **وضعیت:** ⏸ **اختیاری** (نیاز به حساب و کارت بانکی دارد؛ [ADR-005](../decisions/005-no-account-sources-first.md)). در MVP، کشف فیس‌بوک و اینستاگرام از طریق [Overture](overture-maps.md) انجام می‌شود.
 - **نوع دسترسی:** API رسمی
 - **مستندات:** https://api-dashboard.search.brave.com/app/documentation
 - **قیمت:** https://api-dashboard.search.brave.com/documentation/pricing
@@ -48,7 +48,13 @@ URL نتیجه (مثلاً `https://www.instagram.com/shirazkitchen/`)
 ## ذخیره‌سازی
 URL، عنوان و خلاصه‌ی کوتاه ذخیره می‌شوند. طبق شرایط Brave، ذخیره‌ی نتایج در پلن‌های فعلی مجاز است؛ **این مورد قبل از پیاده‌سازی با متن فعلی قوانین تطبیق داده شود.**
 
-## جایگزین‌ها (در صورت تغییر قیمت)
+## جایگزین‌ها
+
+### بدون حساب
+- **Marginalia Search API:** با کلید عمومی `public` و بدون ثبت‌نام کار می‌کند (https://about.marginalia-search.com/article/api/). ولی ایندکسش بیشتر وبلاگ‌ها و سایت‌های غیرتجاری است، کلید عمومی اغلب به محدودیت نرخ می‌خورد و برای پیدا کردن کسب‌وکار ارزش کمی دارد. **در فاز ۳ آزمایش می‌شود.** برای کلید اختصاصی رایگان باید ایمیل زد.
+- **DuckDuckGo:** API جست‌وجوی وب ندارد (Instant Answer API فقط تعریف‌ها و جواب‌های کوتاه برمی‌گرداند) و اسکرپینگش هم ممنوع است ([rejected.md](rejected.md)).
+
+### با حساب
 - **Google Custom Search JSON API:** برای مشتریان جدید بسته است و ۱ ژانویه‌ی ۲۰۲۷ کاملاً خاموش می‌شود ([rejected.md](rejected.md))
 - **SearXNG با میزبانی شخصی:** رایگان، ولی در عمل موتورهای دیگر را اسکرپ می‌کند؛ با [ADR-002](../decisions/002-official-apis-only.md) سازگار نیست
 - موتورهای جست‌وجوی دیگر با API (مثل Mojeek و Tavily): بررسی قیمت در صورت نیاز

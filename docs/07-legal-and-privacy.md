@@ -7,7 +7,7 @@
 1. **فقط API رسمی یا صفحات عمومی مجاز.** قبل از اضافه کردن هر سورس، قوانین استفاده (ToS) و `robots.txt` آن بررسی و نتیجه در فایل همان سورس در `docs/sources/` ثبت می‌شود.
 2. **اسکرپینگ ممنوع** برای Instagram، Facebook، Google Maps یا Search، LinkedIn و Yelp. این سرویس‌ها اسکرپینگ را در قوانینشان صریحاً ممنوع کرده‌اند ([ADR-002](decisions/002-official-apis-only.md)).
 3. **User-Agent شفاف:** کراولر ما برای دایرکتوری‌های عمومی با `FarsiYabBot/1.0 (+https://farsiyab.example/bot)` خودش را معرفی می‌کند، نرخ درخواست را محدود نگه می‌دارد (حداکثر ۱ درخواست در ثانیه برای هر دامنه) و `robots.txt` را رعایت می‌کند.
-4. **ذکر منبع:** هر جا لایسنس سورس لازم بداند، منبع ذکر می‌شود (مثلاً «© OpenStreetMap contributors» و «Powered by Google» برای داده‌های Places).
+4. **ذکر منبع:** هر جا لایسنس سورس لازم بداند، منبع ذکر می‌شود (مثلاً «© OpenStreetMap contributors»، «Overture Maps Foundation» همراه با متن لایسنس Apache 2.0 برای داده‌ی Foursquare، و در صورت فعال شدن، «Google Maps» برای داده‌های Places).
 5. **رعایت شرایط ذخیره‌سازی:** مثلاً Google Places اجازه‌ی ذخیره‌ی دائمی محتوا را نمی‌دهد و فقط `place_id` قابل ذخیره است (جزئیات در [google-places.md](sources/google-places.md)).
 
 ## حریم خصوصی

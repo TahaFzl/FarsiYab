@@ -21,13 +21,17 @@ flowchart TB
         ORCH[Search Orchestrator]
         SCHED[Scheduler<br/>ایندکس دوره‌ای]
         WK[Workers<br/>Celery / RQ]
-        subgraph Adapters[Source Adapters]
+        subgraph Adapters[Source Adapters — MVP، بدون حساب]
+            A0[Overture Maps<br/>Meta · Microsoft · Foursquare]
             A1[OSM Overpass]
-            A2[Google Places]
-            A3[Web Search<br/>Brave]
-            A4[Instagram<br/>Business Discovery]
+            A2[Business Websites]
             A5[Community Directories]
             A6[User Submissions]
+        end
+        subgraph Optional[اختیاری — نیاز به حساب]
+            O1[Google Places]
+            O2[Brave Search]
+            O3[Instagram<br/>Business Discovery]
         end
         DET[Iranian Detector<br/>امتیازدهی]
         DEDUP[Entity Resolver<br/>ادغام تکراری‌ها]
@@ -47,6 +51,7 @@ flowchart TB
     RD --> WK
     WK --> Adapters
     Adapters --> QUOTA
+    Optional -.-> QUOTA
     QUOTA --> RD
     Adapters --> DET --> DEDUP --> PG
     API -.->|SSE: نتایج تدریجی| W
@@ -66,9 +71,14 @@ flowchart TB
 
 ## ایندکس دوره‌ای
 
-- Scheduler هر شب شهرهای فعال را به ترتیب اولویت (تعداد جست‌وجو و قدیمی بودن ایندکس) در صف می‌گذارد.
+> با [ADR-005](decisions/005-no-account-sources-first.md)، سورس اصلی Overture است که فایلی و **ماهانه** منتشر می‌شود. بنابراین:
+> - **ایندکس ماهانه:** بعد از هر release جدید Overture، همه‌ی شهرهای فعال دوباره پردازش می‌شوند (هر شهر چند ثانیه طول می‌کشد).
+> - **ایندکس هفتگی:** OSM و بررسی وب‌سایت کاندیدهای جدید.
+> - **لایو:** وقتی کاربر شهری را جست‌وجو می‌کند که هنوز ایندکس نشده است (خواندن bbox آن شهر از Overture حدود ۲ ثانیه طول می‌کشد) یا برای بررسی وب‌سایت‌های نتایجی که هنوز بررسی نشده‌اند.
+
+- Scheduler هر شب شهرهای فعال (برای OSM و وب‌سایت‌ها) را به ترتیب اولویت (تعداد جست‌وجو و قدیمی بودن ایندکس) در صف می‌گذارد.
 - سورس‌های رایگان و بدون سهمیه‌ی سخت‌گیرانه (مثل OSM) در همه‌ی شهرها اجرا می‌شوند.
-- سورس‌های سهمیه‌دار (Google Places و Brave) بودجه‌ی ماهانه‌شان را بین شهرها تقسیم می‌کنند (بخش «مدیریت سهمیه» را ببینید).
+- سورس‌های اختیاری سهمیه‌دار (Google Places و Brave، در صورت فعال شدن) بودجه‌ی ماهانه‌شان را بین شهرها تقسیم می‌کنند (بخش «مدیریت سهمیه» را ببینید).
 
 ## آداپتر سورس (رابط مشترک)
 

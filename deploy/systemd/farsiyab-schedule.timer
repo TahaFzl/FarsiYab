@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the FarsiYab scheduler daily
+
+[Timer]
+OnCalendar=*-*-* 03:17:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

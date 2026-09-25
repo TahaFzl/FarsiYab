@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from farsiyab import jobs
-from farsiyab.adapters.base import SourceAdapter
+from farsiyab.adapters.base import SourceAdapter, SourceUnavailable
 from farsiyab.adapters.osm import OsmAdapter
 from farsiyab.adapters.overture import OvertureAdapter
 from farsiyab.config import get_settings
@@ -20,6 +20,9 @@ from farsiyab.db import session_factory, session_scope
 from farsiyab.indexer import index_city
 from farsiyab.loader import load_reference
 from farsiyab.models import City, IndexStatus, Job
+from farsiyab.scheduling import coverage as coverage_rows
+from farsiyab.scheduling import coverage_markdown
+from farsiyab.scheduling import schedule as schedule_jobs
 
 app = typer.Typer(help="FarsiYab backend tools.", no_args_is_help=True)
 db_app = typer.Typer(help="Database setup.", no_args_is_help=True)
@@ -110,6 +113,29 @@ def cities() -> None:
         ).all()
     for slug, country, last in rows:
         typer.echo(f"{country}  {slug:<16} {last.isoformat() if last else 'never indexed'}")
+
+
+@app.command()
+def schedule() -> None:
+    """Queue index jobs for cities that are due (run daily by a systemd timer)."""
+    try:
+        latest = OvertureAdapter().resolve_release()
+    except SourceUnavailable as exc:
+        logging.getLogger(__name__).warning("cannot check Overture releases: %s", exc)
+        latest = None
+    with session_factory()() as session:
+        queued = schedule_jobs(session, latest)
+    typer.echo(json.dumps({"overture_release": latest, "queued": queued}, indent=2))
+
+
+@app.command()
+def coverage(
+    markdown: Annotated[bool, typer.Option(help="Print a Markdown table")] = False,
+) -> None:
+    """How many shown businesses each source contributed, per city."""
+    with session_factory()() as session:
+        rows = coverage_rows(session)
+    typer.echo(coverage_markdown(rows) if markdown else json.dumps(rows, indent=2))
 
 
 @app.command()

@@ -25,6 +25,7 @@
 | [docs/07-legal-and-privacy.md](docs/07-legal-and-privacy.md) | قوانین سورس‌ها، حریم خصوصی، حذف اطلاعات |
 | [docs/08-roadmap.md](docs/08-roadmap.md) | فازهای توسعه |
 | [docs/sources/](docs/sources/README.md) | **کاتالوگ سورس‌ها**: یک فایل برای هر سورس |
+| [data/sources.yaml](data/sources.yaml) | تعریف ماشین‌خوان ۲۷ سورس (کد از این فایل می‌خواند) |
 | [docs/decisions/](docs/decisions/README.md) | تصمیم‌های معماری (ADR) |
 
 ## تکنولوژی (خلاصه)

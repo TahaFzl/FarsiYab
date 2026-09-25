@@ -28,6 +28,12 @@ flowchart TB
             A5[Community Directories]
             A6[User Submissions]
         end
+        subgraph Phase3[فاز ۳ — بدون حساب]
+            B1[Common Crawl<br/>Web Data Commons]
+            B2[Gov Open Data<br/>LA · Toronto · IRS · CRA]
+            B3[Wikidata<br/>Wikivoyage]
+            B4[Professional Registries]
+        end
         subgraph Optional[اختیاری — نیاز به حساب]
             O1[Google Places]
             O2[Brave Search]
@@ -52,6 +58,7 @@ flowchart TB
     WK --> Adapters
     Adapters --> QUOTA
     Optional -.-> QUOTA
+    Phase3 --> QUOTA
     QUOTA --> RD
     Adapters --> DET --> DEDUP --> PG
     API -.->|SSE: نتایج تدریجی| W
@@ -81,6 +88,8 @@ flowchart TB
 - سورس‌های اختیاری سهمیه‌دار (Google Places و Brave، در صورت فعال شدن) بودجه‌ی ماهانه‌شان را بین شهرها تقسیم می‌کنند (بخش «مدیریت سهمیه» را ببینید).
 
 ## آداپتر سورس (رابط مشترک)
+
+تعریف همه‌ی سورس‌ها (شناسه، نوع، لایسنس، وضعیت، فاز، نشانه‌ها و ...) در [`data/sources.yaml`](../data/sources.yaml) است و هنگام راه‌اندازی در جدول `source` بارگذاری می‌شود. هر آداپتر با `id` خودش به همان تعریف وصل می‌شود.
 
 همه‌ی سورس‌ها یک رابط مشترک را پیاده‌سازی می‌کنند تا اضافه کردن سورس جدید فقط یک فایل جدید باشد:
 

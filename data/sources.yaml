@@ -1,0 +1,422 @@
+# FarsiYab source registry.
+#
+# Single source of truth for every source the project knows about. The backend
+# loads this file into the `source` table; docs/sources/*.md hold the details.
+#
+# Field reference:
+#   id                 stable id used in code and the database
+#   name_fa / name_en  label shown to users under "sources"
+#   kind               discovery   – finds new candidate businesses
+#                      evidence    – adds proof for candidates found elsewhere
+#                      link_only   – we only build outbound links, never fetch data
+#                      reference   – auxiliary data (cities, geocoding), not shown as a source
+#   access             open_dataset | open_api | public_pages | official_api | form
+#   account_required   false for everything in the MVP (ADR-005)
+#   license            licence of the data we store
+#   storage            full | facts_only | ids_only | none
+#   refresh            how often the adapter runs
+#   status             mvp | planned | candidate | optional | rejected
+#   phase              roadmap phase that implements it (docs/08-roadmap.md)
+#   tested             true only if it was run against real data from this project
+#   signals            detector signals this source can emit (docs/04-iranian-detection.md)
+#   doc                documentation file
+
+sources:
+  # ── MVP: no account needed ────────────────────────────────────────────────
+  - id: overture
+    name_fa: Overture Maps
+    name_en: Overture Maps
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: CDLA-Permissive-2.0 / Apache-2.0 (Foursquare-derived rows)
+    storage: full
+    refresh: monthly (new release)
+    status: mvp
+    phase: 1
+    tested: true            # Toronto, releases 2026-08-19.0 and 2026-09-23.1
+    upstream: [meta, Microsoft, Foursquare, AllThePlaces, PinMeTo, DAC]
+    signals: [overture_persian_category, persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/overture-maps.md
+
+  - id: osm
+    name_fa: اوپن‌استریت‌مپ
+    name_en: OpenStreetMap
+    kind: discovery
+    access: open_api
+    account_required: false
+    license: ODbL-1.0
+    storage: full
+    refresh: weekly
+    status: mvp
+    phase: 1
+    tested: false           # overpass-api.de is blocked by the dev sandbox network policy
+    signals: [osm_cuisine_tag, persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/openstreetmap.md
+
+  - id: website
+    name_fa: وب‌سایت کسب‌وکار
+    name_en: Business website
+    kind: evidence
+    access: public_pages
+    account_required: false
+    license: n/a (facts and short snippets only)
+    storage: facts_only
+    refresh: monthly per site
+    status: mvp
+    phase: 1
+    tested: false
+    signals: [website_persian_content, explicit_keyword, iranian_food_terms, nowruz_yalda_mentions]
+    doc: docs/sources/business-websites.md
+
+  - id: facebook
+    name_fa: فیس‌بوک
+    name_en: Facebook
+    kind: evidence
+    access: open_dataset    # page links published by Meta inside Overture
+    account_required: false
+    license: via Overture
+    storage: ids_only
+    refresh: monthly
+    status: mvp
+    phase: 1
+    tested: true
+    signals: []
+    doc: docs/sources/facebook.md
+
+  - id: instagram
+    name_fa: اینستاگرام
+    name_en: Instagram
+    kind: evidence
+    access: open_dataset    # profile links from Overture, OSM and business websites
+    account_required: false
+    license: via upstream source
+    storage: ids_only
+    refresh: monthly
+    status: mvp
+    phase: 1
+    tested: true
+    signals: [explicit_keyword]   # from the username only
+    doc: docs/sources/instagram.md
+
+  - id: google_maps_link
+    name_fa: گوگل‌مپ
+    name_en: Google Maps
+    kind: link_only
+    access: official_api    # Maps URLs, keyless
+    account_required: false
+    license: n/a
+    storage: none
+    status: mvp
+    phase: 2
+    tested: false
+    signals: []
+    doc: docs/sources/link-only.md
+
+  - id: apple_maps_link
+    name_fa: اپل‌مپ
+    name_en: Apple Maps
+    kind: link_only
+    access: official_api
+    account_required: false
+    license: n/a
+    storage: none
+    status: mvp
+    phase: 2
+    tested: false
+    signals: []
+    doc: docs/sources/link-only.md
+
+  - id: user_submission
+    name_fa: ثبت توسط کاربران
+    name_en: User submission
+    kind: discovery
+    access: form
+    account_required: false
+    license: submitter consent
+    storage: full
+    refresh: continuous
+    status: planned
+    phase: 4
+    tested: false
+    signals: [user_submission_verified]
+    doc: docs/sources/user-submissions.md
+
+  # ── Planned: no account needed ─────────────────────────────────────────────
+  - id: common_crawl
+    name_fa: کامن‌کراول
+    name_en: Common Crawl
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: Common Crawl terms of use
+    storage: facts_only
+    refresh: monthly (offline batch)
+    status: planned
+    phase: 3
+    tested: false
+    signals: [cc_persian_language_site]
+    doc: docs/sources/common-crawl.md
+
+  - id: wdc_schemaorg
+    name_fa: وب دیتا کامنز (schema.org)
+    name_en: Web Data Commons
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: see webdatacommons.org
+    storage: facts_only
+    refresh: yearly (release)
+    status: planned
+    phase: 3
+    tested: false
+    signals: [schemaorg_serves_persian, persian_script_name, explicit_keyword]
+    doc: docs/sources/common-crawl.md
+
+  - id: wikidata
+    name_fa: ویکی‌داده
+    name_en: Wikidata
+    kind: discovery
+    access: open_api
+    account_required: false
+    license: CC0-1.0
+    storage: full
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [wikidata_iran_related, persian_script_name]
+    doc: docs/sources/wikimedia.md
+
+  - id: wikivoyage
+    name_fa: ویکی‌سفر
+    name_en: Wikivoyage
+    kind: discovery
+    access: open_api
+    account_required: false
+    license: CC-BY-SA-4.0
+    storage: facts_only
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [explicit_keyword, iranian_food_terms]
+    doc: docs/sources/wikimedia.md
+
+  - id: gov:la_business
+    name_fa: مجوزهای کسب‌وکار لس‌آنجلس
+    name_en: City of Los Angeles – Active Businesses
+    kind: discovery
+    access: open_api        # Socrata
+    account_required: false
+    license: City of LA open data terms
+    storage: facts_only
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:toronto_business
+    name_fa: مجوزهای کسب‌وکار تورنتو
+    name_en: City of Toronto – Business Licences
+    kind: discovery
+    access: open_api        # CKAN
+    account_required: false
+    license: Open Government Licence – Toronto
+    storage: facts_only
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:vancouver_business
+    name_fa: مجوزهای کسب‌وکار ونکوور
+    name_en: City of Vancouver – Business Licences
+    kind: discovery
+    access: open_api        # Opendatasoft
+    account_required: false
+    license: Open Government Licence – Vancouver
+    storage: facts_only
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:irs_eo_bmf
+    name_fa: مؤسسات غیرانتفاعی آمریکا (IRS)
+    name_en: IRS Exempt Organizations BMF
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: US public domain
+    storage: facts_only
+    refresh: monthly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:cra_charities
+    name_fa: مؤسسات خیریه‌ی کانادا (CRA)
+    name_en: CRA List of Charities
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: Open Government Licence – Canada
+    storage: facts_only
+    refresh: yearly
+    status: planned
+    phase: 3
+    tested: false
+    signals: [explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:corporations_canada
+    name_fa: شرکت‌های فدرال کانادا
+    name_en: Corporations Canada
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: Open Government Licence – Canada
+    storage: facts_only
+    refresh: monthly
+    status: candidate
+    phase: 3
+    tested: false
+    signals: [persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  # ── Candidates: ToS review pending (default mode: link only) ─────────────
+  - id: directory:*
+    name_fa: دایرکتوری‌های ایرانی
+    name_en: Iranian community directories
+    kind: evidence
+    access: public_pages
+    account_required: false
+    license: per directory (EU/UK database right applies)
+    storage: facts_only
+    refresh: weekly
+    status: candidate
+    phase: 3
+    tested: false
+    signals: [listed_in_iranian_directory]
+    doc: docs/sources/community-directories.md
+
+  - id: registry:*
+    name_fa: رجیسترهای رسمی (پزشک، وکیل، مترجم)
+    name_en: Professional registries
+    kind: evidence
+    access: public_pages
+    account_required: false
+    license: per registry
+    storage: facts_only
+    refresh: monthly
+    status: candidate
+    phase: 3
+    tested: false
+    signals: [registry_language_farsi]
+    doc: docs/sources/professional-registries.md
+
+  - id: telegram
+    name_fa: تلگرام
+    name_en: Telegram
+    kind: evidence
+    access: public_pages    # channel links found on business websites
+    account_required: false
+    license: n/a
+    storage: ids_only
+    refresh: monthly
+    status: candidate
+    phase: 5
+    tested: false
+    signals: []
+    doc: docs/sources/telegram.md
+
+  # ── Optional: need an account (ADR-005) ────────────────────────────────────
+  - id: google_places
+    name_fa: گوگل‌مپ (API)
+    name_en: Google Places API
+    kind: discovery
+    access: official_api
+    account_required: true
+    license: Google Maps Platform terms (place_id only may be stored)
+    storage: ids_only
+    status: optional
+    phase: 6
+    tested: false
+    signals: [google_type_persian, persian_script_name, explicit_keyword]
+    doc: docs/sources/google-places.md
+
+  - id: brave_search
+    name_fa: جست‌وجوی وب (Brave)
+    name_en: Brave Search API
+    kind: discovery
+    access: official_api
+    account_required: true
+    license: Brave Search API terms
+    storage: facts_only
+    status: optional
+    phase: 6
+    tested: false
+    signals: [explicit_keyword, persian_script_text]
+    doc: docs/sources/web-search.md
+
+  - id: instagram_business_discovery
+    name_fa: اینستاگرام (API)
+    name_en: Instagram Business Discovery
+    kind: evidence
+    access: official_api
+    account_required: true
+    license: Meta Platform Terms
+    storage: facts_only
+    status: optional
+    phase: 6
+    tested: false
+    signals: [persian_script_text, explicit_keyword]
+    doc: docs/sources/instagram.md
+
+  - id: gov:uk_companies_house
+    name_fa: ثبت شرکت‌های انگلستان
+    name_en: UK Companies House
+    kind: discovery
+    access: official_api
+    account_required: true  # free API key
+    license: Open Government Licence – UK
+    storage: facts_only
+    status: optional
+    phase: 6
+    tested: false
+    signals: [persian_script_name, explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  # ── Reference data (not shown as a result source) ──────────────────────────
+  - id: geonames
+    name_en: GeoNames
+    kind: reference
+    access: open_dataset
+    account_required: false
+    license: CC-BY-4.0
+    status: mvp
+    phase: 1
+    tested: false
+    doc: docs/06-categories-and-locations.md
+
+  - id: nominatim
+    name_en: Nominatim
+    kind: reference
+    access: open_api
+    account_required: false
+    license: ODbL-1.0
+    status: mvp
+    phase: 1
+    tested: false
+    doc: docs/06-categories-and-locations.md
+
+# Rejected sources and the reasons are listed in docs/sources/rejected.md.

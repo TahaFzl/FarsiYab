@@ -16,13 +16,15 @@
 | `beauty` | آرایشگاه و زیبایی | `personal_or_beauty_service`, `personal_care_and_beauty_store` | `shop=hairdresser\|beauty` | `beauty_salon`, `hair_salon` | آرایشگاه ایرانی |
 | `accounting` | حسابداری و مالیات | `financial_service` | `office=accountant` | `accounting` | Iranian accountant |
 | `education` | آموزش و کلاس فارسی | `specialty_school`, `tutoring_service` | `amenity=school\|language_school` | `school` | Persian school, کلاس فارسی |
+| `community` | انجمن‌ها، مراکز فرهنگی، مدارس فارسی | `specialty_school`, `religious_organization`, `social_service_organization` (بررسی شود) | `amenity=community_centre\|place_of_worship`, `club=*` | — | Iranian community centre, کانون ایرانیان |
+| `translator` | ترجمه و دارالترجمه | `b2b_office_and_professional_service` (+ taxonomy `translation_service`؛ بررسی شود) | `office=translator` | — | Farsi translator, مترجم رسمی فارسی |
 | `other` | سایر | بقیه | — | — | — |
 
 مقادیر `basic_category` از داده‌ی واقعی تورنتو (release `2026-08-19.0`) استخراج شده‌اند. برای رستوران‌ها، `taxonomy.primary = persian_restaurant` در release `2026-09-23.1` وجود دارد (۵۴ مورد در تورنتو). قبل از پیاده‌سازی، لیست کامل taxonomy از مستندات Overture گرفته شود.
 
 \* قبل از استفاده، وجود نوع `persian_restaurant` در لیست رسمی types نسخه‌ی New بررسی شود. اگر وجود نداشت، از `restaurant` به همراه `textQuery="Persian restaurant"` استفاده می‌شود.
 
-دسته‌های MVP: ۸ دسته‌ی اول (بدون `accounting` و `education`).
+دسته‌های MVP: ۸ دسته‌ی اول. `accounting`، `education`، `community` (سورس اصلی: مؤسسات غیرانتفاعی IRS و CRA و Wikidata) و `translator` (سورس اصلی: رجیسترهای BDÜ و ATIO) در فاز ۳ اضافه می‌شوند.
 
 ## کشورها و شهرها
 

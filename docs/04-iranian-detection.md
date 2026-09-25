@@ -14,6 +14,9 @@
 | `overture_persian_category` | دسته در Overture | `taxonomy.primary = persian_restaurant` | ۰٫۷ |
 | `website_persian_content` | متن فارسی یا `lang="fa"` در وب‌سایت خود کسب‌وکار | | ۰٫۵ |
 | `registry_language_farsi` | «Farsi» یا «Persian» در زبان‌های پزشک در رجیستری رسمی | [professional-registries.md](sources/professional-registries.md) | ۰٫۸ |
+| `schemaorg_serves_persian` | `servesCuisine = Persian` در schema.org سایت خود کسب‌وکار | [common-crawl.md](sources/common-crawl.md) | ۰٫۷ |
+| `cc_persian_language_site` | Common Crawl زبان سایت را فارسی تشخیص داده | | ۰٫۴ |
+| `wikidata_iran_related` | آیتم Wikidata با ارتباط ایرانی (غذا، برچسب فارسی و ...) | [wikimedia.md](sources/wikimedia.md) | ۰٫۵ |
 | `persian_script_name` | نام با حروف فارسی (نه عربی) | «نان‌وایی تهران» | ۰٫۵ |
 | `persian_script_text` | متن فارسی در توضیحات یا پست‌ها | بیوی اینستاگرام به فارسی | ۰٫۴ |
 | `iranian_place_name` | اسم شهر یا نماد ایرانی در نام | Shiraz, Tehran, Isfahan, Tabriz, Pars, Persepolis, Caspian, Zagros | ۰٫۳ |

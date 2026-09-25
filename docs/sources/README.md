@@ -6,33 +6,51 @@
 
 ## خلاصه
 
-طبق [ADR-005](../decisions/005-no-account-sources-first.md)، **MVP فقط با سورس‌هایی ساخته می‌شود که حساب کاربری، کلید یا کارت بانکی لازم ندارند.**
+طبق [ADR-005](../decisions/005-no-account-sources-first.md)، **هیچ سورسی در MVP و فازهای ۱ تا ۵ حساب کاربری، کلید یا کارت بانکی لازم ندارد.** سورس‌هایی که حساب می‌خواهند همه در فاز ۶ و اختیاری هستند.
 
-### سورس‌های بدون حساب (MVP)
+> **نسخه‌ی ماشین‌خوان این جدول:** [`data/sources.yaml`](../../data/sources.yaml). کد بک‌اند تعریف سورس‌ها را از همین فایل می‌خواند. هر سورس جدید باید هم در آن فایل و هم در این پوشه ثبت شود.
 
-| سورس | فایل | حساب؟ | هزینه | چه چیزی می‌دهد | وضعیت |
-|---|---|---|---|---|---|
-| **Overture Maps** | [overture-maps.md](overture-maps.md) | ❌ | رایگان | داده‌ی مکان‌های **Meta/Facebook**، Microsoft و Foursquare؛ لینک فیس‌بوک و اینستاگرام؛ دسته‌ی `persian_restaurant` | ✅ MVP، سورس اصلی (تست‌شده) |
-| OpenStreetMap (Overpass) | [openstreetmap.md](openstreetmap.md) | ❌ | رایگان | مکان، `name:fa`، `cuisine=persian`، لینک اینستاگرام | ✅ MVP |
-| وب‌سایت خود کسب‌وکارها | [business-websites.md](business-websites.md) | ❌ | رایگان | متن فارسی، «We speak Farsi»، لینک اینستاگرام و تلگرام | ✅ MVP |
-| Facebook | [facebook.md](facebook.md) | ❌ | رایگان | لینک صفحه، از طریق Overture | ✅ MVP |
-| Instagram | [instagram.md](instagram.md) | ❌ | رایگان | لینک پروفایل، از طریق Overture، OSM و وب‌سایت‌ها | ✅ MVP (فقط لینک) |
-| Google Maps (فقط لینک) | [google-places.md](google-places.md#google-maps-urls-بدون-کلید) | ❌ | رایگان | دکمه‌ی «دیدن روی گوگل‌مپ» برای هر نتیجه (بدون گرفتن داده) | ✅ MVP |
-| دایرکتوری‌های ایرانی | [community-directories.md](community-directories.md) | ❌ | رایگان | کسب‌وکارهایی که خودشان را ایرانی معرفی کرده‌اند | 🔍 در حال بررسی |
-| رجیسترهای پزشکی | [professional-registries.md](professional-registries.md) | ❌ | رایگان | زبان‌هایی که پزشک صحبت می‌کند | 🔍 کاندید |
-| ثبت توسط کاربران | [user-submissions.md](user-submissions.md) | ❌ | رایگان | کسب‌وکارهای جاافتاده | ⏳ فاز ۴ |
-| تلگرام | [telegram.md](telegram.md) | ❌ | رایگان | لینک کانال‌ها (از وب‌سایت‌ها) | ⏳ فاز ۵ |
+راهنمای ستون «نقش»: **کشف** = کسب‌وکار کاندید جدید پیدا می‌کند · **مدرک** = برای کاندیدهای موجود مدرک و لینک پیدا می‌کند · **لینک** = فقط لینک بیرونی می‌سازد و داده‌ای نمی‌گیرد
 
-### سورس‌های اختیاری (نیاز به حساب؛ در صورت ساخت حساب)
+### فاز ۱ و ۲ (MVP): بدون حساب
+| سورس | فایل | نقش | چه چیزی می‌دهد | تست‌شده؟ |
+|---|---|---|---|---|
+| **Overture Maps** | [overture-maps.md](overture-maps.md) | کشف | داده‌ی **Meta/Facebook**، Microsoft و Foursquare؛ لینک فیس‌بوک و اینستاگرام؛ `persian_restaurant` | ✅ تورنتو |
+| OpenStreetMap | [openstreetmap.md](openstreetmap.md) | کشف | `name:fa`، `cuisine=persian`، `contact:instagram` | ⚠️ |
+| وب‌سایت کسب‌وکار | [business-websites.md](business-websites.md) | مدرک | متن فارسی، «We speak Farsi»، لینک اینستاگرام و تلگرام | ⚠️ |
+| Facebook | [facebook.md](facebook.md) | مدرک | لینک صفحه (از Overture) | ✅ |
+| Instagram | [instagram.md](instagram.md) | مدرک | لینک پروفایل (از Overture، OSM و وب‌سایت‌ها) | ✅ |
+| Google Maps / Apple Maps | [link-only.md](link-only.md) | لینک | دکمه‌ی «دیدن روی نقشه» | — |
 
-| سورس | فایل | چه چیزی لازم دارد | ارزش افزوده |
-|---|---|---|---|
-| Google Places API | [google-places.md](google-places.md) | حساب Google Cloud + کارت بانکی | پوشش بیشتر و به‌روزتر |
-| Brave Search API | [web-search.md](web-search.md) | حساب + کارت بانکی | کشف پروفایل‌های اینستاگرامی که هیچ جای دیگری ثبت نشده‌اند |
-| Instagram Business Discovery | [instagram.md](instagram.md#اختیاری-business-discovery-api) | حساب Instagram Business + Facebook Page + Meta App | خواندن بیوی پروفایل‌ها |
+### فاز ۳: سورس‌های بیشتر، بدون حساب
+| سورس | فایل | نقش | چه چیزی می‌دهد | تست‌شده؟ |
+|---|---|---|---|---|
+| Common Crawl | [common-crawl.md](common-crawl.md) | کشف | **وب‌سایت‌های فارسی‌زبان** روی دامنه‌های کشورهای هدف | ⚠️ |
+| Web Data Commons | [common-crawl.md](common-crawl.md#۲-web-data-commons-schemaorg) | کشف | `servesCuisine: Persian` که صاحب سایت خودش اعلام کرده | ⚠️ |
+| Wikidata / Wikivoyage | [wikimedia.md](wikimedia.md) | کشف | سازمان‌ها، مراکز فرهنگی، رستوران‌های شناخته‌شده | ⚠️ |
+| مجوز کسب‌وکار شهرها (LA، تورنتو، ونکوور و ...) | [government-open-data.md](government-open-data.md) | کشف | **همه‌ی** کسب‌وکارهای دارای مجوز (برای Detector روی نام) | ⚠️ |
+| مؤسسات غیرانتفاعی (IRS، CRA) | [government-open-data.md](government-open-data.md) | کشف | انجمن‌ها و کانون‌های ایرانی | ⚠️ |
+| دایرکتوری‌های ایرانی (**۱۹ کاندید** در ۴ کشور) | [community-directories.md](community-directories.md) | مدرک/کشف | کسب‌وکارهایی که خودشان را ایرانی معرفی کرده‌اند | 🔍 بررسی ToS |
+| رجیسترهای رسمی (CPSO، CalBar، BDÜ و ...) | [professional-registries.md](professional-registries.md) | مدرک/لینک | **زبان فارسی** پزشک، وکیل یا مترجم | 🔍 بررسی ToS |
+
+### فاز ۴ و ۵
+| سورس | فایل | نقش |
+|---|---|---|
+| ثبت توسط کاربران | [user-submissions.md](user-submissions.md) | کشف |
+| تلگرام | [telegram.md](telegram.md) | مدرک (لینک کانال‌ها) |
+
+### فاز ۶: اختیاری، نیاز به حساب
+| سورس | فایل | چه چیزی لازم دارد |
+|---|---|---|
+| Google Places API | [google-places.md](google-places.md) | حساب Google Cloud + کارت بانکی |
+| Brave Search API | [web-search.md](web-search.md) | حساب + کارت بانکی |
+| Instagram Business Discovery | [instagram.md](instagram.md#اختیاری-business-discovery-api) | حساب Instagram Business + Facebook Page + Meta App |
+| UK Companies House | [government-open-data.md](government-open-data.md) | API key رایگان |
 
 ### رد شده‌ها
-[rejected.md](rejected.md): Yelp، Foursquare API، Google Custom Search، اسکرپینگ، DuckDuckGo و ...
+[rejected.md](rejected.md): Yelp، Foursquare API، Google Custom Search، اسکرپینگ، DuckDuckGo، NPPES، API غیررسمی 116117 و ...
+
+⚠️ = از مستندات رسمی بررسی شده، ولی به دلیل محدودیت شبکه‌ی محیط توسعه هنوز روی داده‌ی واقعی اجرا نشده است.
 
 ### داده‌های کمکی (منبع نتیجه نیستند)
 

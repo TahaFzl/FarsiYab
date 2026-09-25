@@ -6,6 +6,7 @@ User-Agent with contact details, which `Settings.user_agent` provides.
 
 import logging
 import re
+import time
 from collections.abc import Iterator
 from typing import Any
 
@@ -27,9 +28,34 @@ HINTS = "Persian|Iranian|Farsi|Tehran|Shiraz|Isfahan|Esfahan|Tabriz|Persepolis"
 
 
 def _client(client: httpx.Client | None) -> httpx.Client:
+    # HTTP/2: Wikimedia's robot policy answered 403 to HTTP/1.1 requests from Python
+    # clients during the phase 3 live test, even with a proper User-Agent.
     return client or httpx.Client(
-        headers={"User-Agent": get_settings().user_agent}, timeout=60, follow_redirects=True
+        headers={"User-Agent": get_settings().user_agent},
+        timeout=120,
+        follow_redirects=True,
+        http2=True,
     )
+
+
+def _send(send: Any, what: str, retries: int = 2) -> httpx.Response:
+    """Call `send()`; on 429 wait for Retry-After (at most 90 s) and try again."""
+    for attempt in range(retries + 1):
+        try:
+            response = send()
+        except httpx.HTTPError as exc:
+            raise SourceUnavailable(f"{what} unreachable: {exc}") from exc
+        if response.status_code == 429:
+            if attempt == retries:
+                break
+            wait = min(int(response.headers.get("retry-after", "60") or 60), 90)
+            log.warning("%s: rate limited, waiting %ss", what, wait)
+            time.sleep(wait)
+            continue
+        if response.status_code != 200:
+            raise SourceUnavailable(f"{what} returned HTTP {response.status_code}")
+        return response
+    raise SourceUnavailable(f"{what} kept rate-limiting us")
 
 
 # ── Wikivoyage ────────────────────────────────────────────────────────────────
@@ -142,18 +168,19 @@ def listing_from_template(
 class WikivoyageAdapter:
     id = "wikivoyage"
 
-    def __init__(self, pages: dict[str, list[str]], client: httpx.Client | None = None):
+    def __init__(
+        self, pages: dict[str, list[str]], client: httpx.Client | None = None, delay: float = 1.0
+    ):
         self.pages = pages  # city slug -> Wikivoyage page titles
         self.client = _client(client)
+        self.delay = delay
 
     def _get(self, params: dict[str, Any]) -> dict[str, Any]:
-        try:
-            response = self.client.get(WIKIVOYAGE_API, params={**params, "format": "json"})
-        except httpx.HTTPError as exc:
-            raise SourceUnavailable(f"Wikivoyage unreachable: {exc}") from exc
-        if response.status_code != 200:
-            raise SourceUnavailable(f"Wikivoyage returned HTTP {response.status_code}")
-        return response.json()
+        time.sleep(self.delay)  # be gentle: one city can be dozens of district pages
+        return _send(
+            lambda: self.client.get(WIKIVOYAGE_API, params={**params, "format": "json"}),
+            "Wikivoyage",
+        ).json()
 
     def page_titles(self, base: str) -> list[str]:
         """The city page plus its district pages ("Toronto/Downtown", …)."""
@@ -261,15 +288,13 @@ class WikidataAdapter:
         self.client = _client(client)
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
-        try:
-            response = self.client.post(
+        response = _send(
+            lambda: self.client.post(
                 WIKIDATA_SPARQL,
                 data={"query": build_sparql(city.bbox)},
                 headers={"Accept": "application/sparql-results+json"},
-            )
-        except httpx.HTTPError as exc:
-            raise SourceUnavailable(f"Wikidata unreachable: {exc}") from exc
-        if response.status_code != 200:
-            raise SourceUnavailable(f"Wikidata returned HTTP {response.status_code}")
+            ),
+            "Wikidata",
+        )
         for binding in response.json().get("results", {}).get("bindings", []):
             yield binding_to_listing(binding)

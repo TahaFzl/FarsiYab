@@ -22,7 +22,12 @@ class Settings(BaseSettings):
     overture_bucket: str = "overturemaps-us-west-2"
     overture_region: str = "us-west-2"
 
-    overpass_url: str = "https://overpass-api.de/api/interpreter"
+    # Public Overpass instances, tried in order (https://wiki.openstreetmap.org/wiki/Overpass_API).
+    overpass_urls: list[str] = [
+        "https://overpass-api.de/api/interpreter",
+        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
+    ]
 
     # A city is re-indexed when a search hits it and its index is older than this.
     reindex_after_days: int = 7

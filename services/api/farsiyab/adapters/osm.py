@@ -24,17 +24,27 @@ POI_KEYS = ("amenity", "shop", "office", "healthcare", "craft", "club", "tourism
 NAME_HINTS = "persian|iranian|farsi|tehran|shiraz|isfahan|esfahan|tabriz|mashhad|persepolis"
 
 
-def build_query(bbox: tuple[float, float, float, float], timeout: int = 120) -> str:
+def build_query(bbox: tuple[float, float, float, float], timeout: int = 180) -> str:
+    """Businesses first (by POI key), then only those with an Iranian hint.
+
+    Filtering the POI set is much cheaper for the server than running the name
+    regexes over every object in a metro-sized box, which public instances
+    answered with 504s during the phase 3 live test.
+    """
     west, south, east, north = bbox
     b = f"({south},{west},{north},{east})"
+    pois = "\n".join(f'  nwr["{key}"]{b};' for key in POI_KEYS)
     return f"""[out:json][timeout:{timeout}];
 (
-  nwr["cuisine"~"persian|iranian",i]{b};
-  nwr["name:fa"]{b};
-  nwr["language:fa"="yes"]{b};
-  nwr["name"~"[پچژگ]"]{b};
-  nwr["name"~"{NAME_HINTS}",i]{b};
-  nwr["description"~"persian|iranian|farsi",i]{b};
+{pois}
+)->.pois;
+(
+  nwr.pois["cuisine"~"persian|iranian",i];
+  nwr.pois["name:fa"];
+  nwr.pois["language:fa"="yes"];
+  nwr.pois["name"~"[پچژگ]"];
+  nwr.pois["name"~"{NAME_HINTS}",i];
+  nwr.pois["description"~"persian|iranian|farsi",i];
 );
 out center tags;"""
 
@@ -109,7 +119,7 @@ class OsmAdapter:
         retries: int = 2,
     ) -> None:
         settings = get_settings()
-        self.url = settings.overpass_url
+        self.urls = list(settings.overpass_urls)
         self.client = client or httpx.Client(
             headers={"User-Agent": settings.user_agent}, timeout=180
         )
@@ -117,20 +127,27 @@ class OsmAdapter:
         self.retries = retries
 
     def _query(self, query: str) -> dict[str, Any]:
-        for attempt in range(self.retries + 1):
-            try:
-                response = self.client.post(self.url, data={"data": query})
-            except httpx.HTTPError as exc:
-                raise SourceUnavailable(f"Overpass unreachable: {exc}") from exc
-            if response.status_code in (429, 502, 503, 504) and attempt < self.retries:
-                wait = 30 * (attempt + 1)
-                log.warning("overpass: HTTP %s, retrying in %ss", response.status_code, wait)
-                time.sleep(wait)
-                continue
-            if response.status_code != 200:
-                raise SourceUnavailable(f"Overpass returned HTTP {response.status_code}")
-            return response.json()
-        raise SourceUnavailable("Overpass kept rejecting the query")
+        """Try each public instance in turn; each gets `retries` extra attempts on 429/5xx."""
+        errors = []
+        for url in self.urls:
+            for attempt in range(self.retries + 1):
+                try:
+                    response = self.client.post(url, data={"data": query})
+                except httpx.HTTPError as exc:
+                    errors.append(f"{url}: {type(exc).__name__}")
+                    break
+                if response.status_code in (429, 502, 503, 504) and attempt < self.retries:
+                    wait = 30 * (attempt + 1)
+                    log.warning("overpass %s: HTTP %s, retrying in %ss", url, response.status_code,
+                                wait)
+                    time.sleep(wait)
+                    continue
+                if response.status_code == 200:
+                    return response.json()
+                errors.append(f"{url}: HTTP {response.status_code}")
+                break
+            log.warning("overpass: %s failed, trying the next instance", url)
+        raise SourceUnavailable("Overpass unavailable: " + "; ".join(errors))
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
         log.info("osm: querying Overpass for %s", city.slug)

@@ -126,6 +126,7 @@ class TestOsm:
         query = build_query(TORONTO.bbox)
         assert "(43.55,-79.7,43.95,-79.1)" in query
         assert '["cuisine"~"persian|iranian",i]' in query
+        assert 'nwr["amenity"](43.55,-79.7,43.95,-79.1);' in query
 
     def test_element_to_listing(self):
         restaurant = element_to_listing(OVERPASS_RESPONSE["elements"][0], default_mapper())
@@ -150,6 +151,16 @@ class TestOsm:
                               headers={"User-Agent": "FarsiYabBot/test"})
         listings = list(OsmAdapter(client=client).fetch(TORONTO))
         assert [x.external_id for x in listings] == ["node/1", "way/2"]
+
+    def test_falls_back_to_the_next_instance(self):
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.host == "overpass-api.de":
+                return httpx.Response(504)
+            return httpx.Response(200, json=OVERPASS_RESPONSE)
+
+        client = httpx.Client(transport=httpx.MockTransport(handler))
+        listings = list(OsmAdapter(client=client, retries=0).fetch(TORONTO))
+        assert len(listings) == 2
 
     def test_errors_become_source_unavailable(self):
         client = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(403)))
@@ -219,6 +230,32 @@ class TestWebsiteChecker:
             {"https://shiraz.example/robots.txt": httpx.Response(503)}, "https://shiraz.example/"
         )
         assert (result.reason, result.retryable) == ("robots_unreachable", True)
+
+    def test_http_links_try_https_first(self):
+        routes = {"https://shiraz.example/": httpx.Response(
+            200, text=PERSIAN_PAGE, headers={"content-type": "text/html"})}
+        result = self.check(routes, "http://shiraz.example/")
+        assert result.ok and result.final_url == "https://shiraz.example/"
+        assert result.url == "http://shiraz.example/"
+
+    def test_falls_back_to_http_when_https_fails(self):
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.url.scheme == "https":
+                raise httpx.ConnectError("no TLS here")
+            if request.url.path == "/robots.txt":
+                return httpx.Response(404)
+            return httpx.Response(200, text=PERSIAN_PAGE, headers={"content-type": "text/html"})
+
+        async def run():
+            client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+            checker = WebsiteChecker(client=client, settings=self.settings)
+            try:
+                return await checker.check("http://shiraz.example/")
+            finally:
+                await checker.aclose()
+
+        result = asyncio.run(run())
+        assert result.ok and result.final_url == "http://shiraz.example/"
 
     def test_non_html_is_skipped(self):
         result = self.check(

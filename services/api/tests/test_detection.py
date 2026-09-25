@@ -82,6 +82,13 @@ def test_text_fields_emit_text_signal_and_pages_emit_none():
     assert "explicit_keyword" in page
 
 
+def test_negative_keywords_on_pages_only_count_in_the_head():
+    body = "Persian kabab. We accept CAD, AFGHANI and USD. Turkish coffee."
+    assert "negative_keyword" not in signals_for(body, kind="page")
+    assert "negative_keyword" in signals_for("Kabob, Mantu & Afghan Food in Toronto",
+                                             kind="page_head")
+
+
 def test_foods_and_occasions():
     found = signals_for("Best koobideh and tahdig in town, Nowruz specials")
     assert {"iranian_food_terms", "nowruz_yalda_mentions"} <= set(found)

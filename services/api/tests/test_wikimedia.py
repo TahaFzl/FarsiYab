@@ -52,7 +52,7 @@ def wikivoyage_client():
 
 
 def test_wikivoyage_adapter_reads_district_pages_and_skips_out_of_town():
-    adapter = WikivoyageAdapter({"toronto": ["Toronto"]}, client=wikivoyage_client())
+    adapter = WikivoyageAdapter({"toronto": ["Toronto"]}, client=wikivoyage_client(), delay=0)
     listings = list(adapter.fetch(TORONTO))
     assert [x.name for x in listings] == ["Takht-e Tavoos", "Some Bar"]  # not Niagara Falls
     cafe = listings[0]
@@ -104,7 +104,8 @@ def test_sparql_uses_the_city_box():
     assert '"Point(-79.1 43.95)"^^geo:wktLiteral' in query
 
 
-def test_wikidata_adapter_over_http():
+def test_wikidata_adapter_over_http(monkeypatch):
+    monkeypatch.setattr("farsiyab.adapters.wikimedia.time.sleep", lambda s: None)
     def handler(request: httpx.Request) -> httpx.Response:
         assert b"wikibase%3Abox" in request.content or b"wikibase:box" in request.content
         return httpx.Response(200, json={"results": {"bindings": BINDINGS}})
@@ -114,8 +115,19 @@ def test_wikidata_adapter_over_http():
     assert [x.external_id for x in listings] == ["Q123", "Q456"]
 
     failing = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(429)))
-    with pytest.raises(SourceUnavailable):
+    with pytest.raises(SourceUnavailable, match="rate-limiting"):
         list(WikidataAdapter(client=failing).fetch(TORONTO))
+
+    calls = []
+
+    def limited_once(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        if len(calls) == 1:
+            return httpx.Response(429, headers={"retry-after": "5"})
+        return httpx.Response(200, json={"results": {"bindings": BINDINGS[:1]}})
+
+    client = httpx.Client(transport=httpx.MockTransport(limited_once))
+    assert len(list(WikidataAdapter(client=client).fetch(TORONTO))) == 1
 
 
 @pytest.mark.parametrize(

@@ -14,7 +14,8 @@ from farsiyab.detection import script
 from farsiyab.detection.lexicon import Lexicons, default_lexicons, normalize_text
 from farsiyab.detection.signals import WEIGHTS, Signal, make
 
-FieldKind = Literal["name", "text", "username", "page"]
+# page_head: a web page's title and meta description; page: the rest of its text.
+FieldKind = Literal["name", "text", "username", "page_head", "page"]
 
 LATIN_TOKEN = re.compile(r"[A-Za-z]+")
 SNIPPET_CONTEXT = 60
@@ -37,7 +38,7 @@ def _context(text: str, start: int, end: int) -> str:
 
 
 def _script_signal(field: TextField) -> Signal | None:
-    if field.kind in ("username", "page"):
+    if field.kind in ("username", "page_head", "page"):
         return None
     kind = script.classify(field.text)
     if kind not in (script.Script.PERSIAN_DEFINITIVE, script.Script.PERSIAN_LIKELY):
@@ -73,6 +74,10 @@ def _keyword_signals(field: TextField, lex: Lexicons) -> list[Signal]:
         (lex.occasions, "nowruz_yalda_mentions"),
         (lex.negative, "negative_keyword"),
     ):
+        # Page bodies mention other nationalities all the time (currency lists, language
+        # pickers, "Turkish coffee" on a menu); only the title/description count there.
+        if signal == "negative_keyword" and field.kind == "page":
+            continue
         m = pattern.search(norm)
         if m:
             found.append(make(signal, _context(text, *m.span()), field.url))

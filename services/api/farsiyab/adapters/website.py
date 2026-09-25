@@ -93,9 +93,18 @@ def analyse_html(html: str, url: str) -> tuple[str | None, str | None, list[Sign
         snippet = f'lang="{lang}"' if is_fa_lang and not sample else sample
         signals.append(make("website_persian_content", snippet, url))
 
-    # Keyword signals from the page; "page" fields skip the script signal covered above.
-    signals.extend(detector.detect([TextField("page", page_text, url)]))
+    # Keyword signals; the script signal is covered above. Negative signals are taken
+    # from the title and description only (see detector.py).
+    head = " ".join(p for p in (title, description) if p)
+    signals.extend(detector.detect([TextField("page_head", head, url),
+                                    TextField("page", body_text, url)]))
     return lang, title, signals, list(links.values())
+
+
+def _https_first(url: str) -> list[str]:
+    if url.lower().startswith("http://"):
+        return ["https://" + url[len("http://"):], url]
+    return [url]
 
 
 class WebsiteChecker:
@@ -157,25 +166,36 @@ class WebsiteChecker:
         return self._robots[origin]
 
     async def check(self, url: str) -> WebsiteResult:
+        """Check one site. For http:// links HTTPS is tried first: most sites support
+        it, and some networks (like the dev sandbox) refuse plain HTTP outright."""
         async with self._semaphore:
-            robots = await self._robots_for(url)
-            if robots is None:
-                return WebsiteResult(url, ok=False, reason="robots_unreachable")
-            if not robots.can_fetch(self.settings.user_agent, url):
-                return WebsiteResult(url, ok=False, reason="robots")
-            try:
-                response = await self._polite_get(url)
-            except httpx.HTTPError as exc:
-                return WebsiteResult(url, ok=False, reason=f"error: {type(exc).__name__}")
-            final_url = response.url
-            if response.status_code != 200:
-                return WebsiteResult(url, ok=False, final_url=final_url,
-                                     reason=f"http_{response.status_code}")
-            if response.content_type and "html" not in response.content_type:
-                return WebsiteResult(url, ok=False, final_url=final_url, reason="not_html")
-            lang, title, signals, links = analyse_html(response.text, final_url)
-            return WebsiteResult(url, ok=True, final_url=final_url, lang=lang, title=title,
-                                 signals=signals, links=links)
+            result = WebsiteResult(url, ok=False, reason="error: no attempt")
+            for candidate in _https_first(url):
+                result = await self._check_one(candidate)
+                if not result.retryable:
+                    break
+            result.url = url
+            return result
+
+    async def _check_one(self, url: str) -> WebsiteResult:
+        robots = await self._robots_for(url)
+        if robots is None:
+            return WebsiteResult(url, ok=False, reason="robots_unreachable")
+        if not robots.can_fetch(self.settings.user_agent, url):
+            return WebsiteResult(url, ok=False, reason="robots")
+        try:
+            response = await self._polite_get(url)
+        except httpx.HTTPError as exc:
+            return WebsiteResult(url, ok=False, reason=f"error: {type(exc).__name__}")
+        final_url = response.url
+        if response.status_code != 200:
+            return WebsiteResult(url, ok=False, final_url=final_url,
+                                 reason=f"http_{response.status_code}")
+        if response.content_type and "html" not in response.content_type:
+            return WebsiteResult(url, ok=False, final_url=final_url, reason="not_html")
+        lang, title, signals, links = analyse_html(response.text, final_url)
+        return WebsiteResult(url, ok=True, final_url=final_url, lang=lang, title=title,
+                             signals=signals, links=links)
 
     async def check_many(self, urls: list[str]) -> list[WebsiteResult]:
         return await asyncio.gather(*(self.check(u) for u in urls))

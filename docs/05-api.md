@@ -69,6 +69,8 @@
       "last_verified_at": "2026-09-20T03:12:00Z"
     }
   ],
+  "city": { "slug": "toronto", "country": "CA", "name": "تورنتو", "last_indexed_at": "2026-09-25T16:45:28Z" },
+  "categories": ["restaurant"],
   "total": 37,
   "page": 1,
   "page_size": 20,
@@ -91,25 +93,24 @@
   "error": null, "created_at": "…", "finished_at": "…" }
 ```
 
-### `GET /search/jobs/{job_id}/stream` (SSE) ⏳ فاز ۲
-برای نمایش تدریجی نتایج در فرانت‌اند:
+### `GET /search/jobs/{job_id}/stream` (SSE) ✅ فاز ۲
+پیشرفت job ایندکس به‌صورت Server-Sent Events:
 
 ```
-event: source_started
-data: {"source": "overture"}
+event: progress
+data: {"status": "running", "sources": {"overture": {"seen": 113630, "stored": 58, "release": "2026-09-23.1"}, "osm": {"error": "Overpass unreachable"}}, "error": null}
 
-event: result
-data: { …مثل آیتم‌های results… }
-
-event: source_finished
-data: {"source": "overture", "count": 12}
-
-event: source_failed
-data: {"source": "osm", "reason": "Overpass unreachable"}
+event: progress
+data: {"status": "running", "sources": {…, "website": {"status": "running"}}, "error": null}
 
 event: done
-data: {"total_new": 9}
+data: {"status": "done", "sources": {…}, "error": null}
 ```
+
+- `progress` هر بار که وضعیت job تغییر کند ارسال می‌شود. Worker بعد از هر سورس، وضعیت را در `job.result.progress` می‌نویسد.
+- رویداد پایانی یکی از `done`، `failed` یا `timeout` است (بعد از ۵ دقیقه).
+- هر ۱۵ ثانیه یک comment به‌عنوان keep-alive فرستاده می‌شود.
+- **تغییر نسبت به طرح اولیه:** به‌جای ارسال تک‌تک نتیجه‌ها با رویداد `result`، سایت بعد از تمام شدن هر سورس صفحه‌ی نتایج را از سرور دوباره می‌گیرد (`router.refresh()`). نتیجه برای کاربر یکی است، ولی مرتب‌سازی، فیلترها و صفحه‌بندی همیشه درست می‌مانند.
 
 ## گزارش و ثبت
 

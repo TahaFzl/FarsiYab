@@ -152,7 +152,7 @@ class SourceAdapter(Protocol):
 ```
 FarsiYab/
 ├── apps/
-│   └── web/                 # Next.js (فاز ۲)
+│   └── web/                 # Next.js: src/app/[lang]/، src/components/، e2e/
 ├── services/
 │   └── api/                 # FastAPI + workers
 │       ├── farsiyab/
@@ -163,7 +163,7 @@ FarsiYab/
 │       ├── migrations/      # Alembic
 │       └── tests/
 ├── data/                    # لیست شهرها، دسته‌ها، واژه‌نامه‌ها
-├── deploy/                  # فایل‌های systemd و تنظیمات Caddy برای سرور (فاز ۲)
+├── deploy/                  # systemd، Caddyfile و راهنمای نصب سرور
 ├── research/                # اسکریپت‌های بررسی سورس‌ها (مثل overture_probe.py)
 ├── scripts/                 # setup_db.sh: ساخت دیتابیس و فعال‌سازی PostGIS
 └── docs/

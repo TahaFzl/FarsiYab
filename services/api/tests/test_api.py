@@ -4,7 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from farsiyab.api import app, get_session
+from farsiyab import jobs
+from farsiyab.api import app, get_session_factory
 from farsiyab.detection.signals import make
 from farsiyab.indexer import recompute_scores, store_listing
 from farsiyab.models import Business, City, IndexStatus
@@ -13,11 +14,7 @@ from tests.test_pipeline import listing
 
 @pytest.fixture
 def client(db, session_maker):
-    def override():
-        with session_maker() as session:
-            yield session
-
-    app.dependency_overrides[get_session] = override
+    app.dependency_overrides[get_session_factory] = lambda: session_maker
     yield TestClient(app)
     app.dependency_overrides.clear()
 
@@ -122,6 +119,34 @@ def test_unindexed_city_queues_one_job(client):
     status = client.get(f"/api/v1/search/jobs/{job['job_id']}").json()
     assert (status["kind"], status["status"]) == ("index_city", "queued")
     assert client.get("/api/v1/search/jobs/00000000-0000-0000-0000-000000000000").status_code == 404
+
+
+def test_search_includes_city_and_index_time(client, toronto_data):
+    body = search(client, categories="doctor", lang="en")
+    assert body["city"]["name"] == "Toronto" and body["city"]["last_indexed_at"]
+    assert body["categories"] == ["doctor", "doctor/dentist"]
+
+
+def test_job_stream_reports_progress_then_done(client, db, monkeypatch):
+    import farsiyab.api as api_module
+
+    monkeypatch.setattr(api_module, "STREAM_POLL_SECONDS", 0.01)
+    job = jobs.enqueue(db, "index_city", {"city": "toronto"}, "index_city:toronto")
+    job.status = "done"
+    job.result = {"city": "toronto", "sources": {"overture": {"seen": 3, "stored": 1}}}
+    db.commit()
+
+    with client.stream("GET", f"/api/v1/search/jobs/{job.id}/stream") as response:
+        assert response.headers["content-type"].startswith("text/event-stream")
+        body = "".join(response.iter_text())
+    events = [block.split("\n")[0] for block in body.strip().split("\n\n")]
+    assert events == ["event: progress", "event: done"]
+    assert '"stored": 1' in body
+
+
+def test_job_stream_unknown_job(client):
+    url = "/api/v1/search/jobs/00000000-0000-0000-0000-000000000000/stream"
+    assert client.get(url).status_code == 404
 
 
 def test_three_not_iranian_reports_hide_a_business(client, toronto_data, db):

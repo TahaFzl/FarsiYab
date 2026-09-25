@@ -89,6 +89,7 @@ score = score × (1 − w_neg) برای هر نشانه‌ی منفی
 |---|---|---|
 | «Michael Bastani, DPM»، «Sohan L Dua»، «Chelo's Beauty Salon» | bastani، sohan و chelo هم غذا هستند و هم اسم شخص | حالت تک‌کلمه‌ای این‌ها از `persian_foods.txt` حذف شد؛ شکل‌های چندکلمه‌ای (chelo kabab، bastani sonnati) باقی ماندند |
 | «Caspian Coast Coffee»، «The Kish Group»، «Kish Mish» | Caspian و Kish کلمه‌ی معمولی یا اسم خانوادگی هستند | به `iranian_places_ambiguous.txt` با وزن ۰٫۱۵ منتقل شدند: به‌تنهایی نمایش داده نمی‌شوند، ولی وب‌سایتشان بررسی می‌شود |
+| «Alex Parsi DDS» (در تست فاز ۲ دیده شد) | Parsi هم اسم خانوادگی است و هم نام جامعه‌ی زرتشتیان هند («Parsi cuisine») | از کلمات صریح (`keywords_explicit.txt`) حذف و به `iranian_places_ambiguous.txt` منتقل شد. تعداد پزشکان نمایش‌داده‌شده در لس‌آنجلس از ۱۱ به ۶ رسید |
 
 ## آستانه‌ها در کد
 | آستانه | مقدار | معنی |

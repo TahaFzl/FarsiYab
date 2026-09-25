@@ -1,0 +1,24 @@
+# /etc/caddy/Caddyfile — replace the domain; Caddy gets the HTTPS certificate itself.
+farsiyab.example.com {
+	encode zstd gzip
+
+	# Access logs contain IP addresses: keep them for at most 7 days
+	# (promised on the privacy page).
+	log {
+		output file /var/log/caddy/farsiyab.log {
+			roll_keep_for 168h
+		}
+	}
+
+	# API (including the SSE progress stream) goes straight to FastAPI.
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000 {
+			flush_interval -1
+		}
+	}
+
+	# Everything else is the Next.js site.
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

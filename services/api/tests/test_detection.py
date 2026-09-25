@@ -56,6 +56,7 @@ def test_name_is_split_into_persian_and_latin_parts():
         ("Caspian Coast Coffee", {"iranian_place_name"}, None),
         ("Kish Mish", {"iranian_place_name"}, None),
         ("Pars Travel Agency", {"iranian_place_name"}, "low"),
+        ("Alex Parsi Dds Inc", {"iranian_place_name"}, None),
         ("Chelo Kabab House", {"iranian_food_terms"}, "low"),
     ],
 )

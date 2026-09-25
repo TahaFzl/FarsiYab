@@ -1,5 +1,7 @@
 """HTTP API (docs/05-api.md)."""
 
+import json
+import time
 import uuid
 from collections import defaultdict
 from collections.abc import Iterator
@@ -8,9 +10,10 @@ from typing import Annotated, Any, Literal
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Select, exists, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from farsiyab import jobs
 from farsiyab.config import get_settings
@@ -36,12 +39,22 @@ Lang = Literal["fa", "en"]
 MIN_SCORE = {"low": 0.25, "medium": 0.45, "high": 0.75}
 SOCIAL_KINDS = ("facebook", "instagram", "telegram")
 HIDE_AFTER_NOT_IRANIAN_REPORTS = 3
+STREAM_POLL_SECONDS = 1.0
+STREAM_TIMEOUT_SECONDS = 300
+STREAM_HEARTBEAT_SECONDS = 15
 
 app = FastAPI(title="FarsiYab API", version="0.1.0")
 
 
-def get_session() -> Iterator[Session]:
-    with session_factory()() as session:
+def get_session_factory() -> sessionmaker[Session]:
+    return session_factory()
+
+
+FactoryDep = Annotated[sessionmaker[Session], Depends(get_session_factory)]
+
+
+def get_session(factory: FactoryDep) -> Iterator[Session]:
+    with factory() as session:
         yield session
 
 
@@ -288,7 +301,17 @@ def search(
         stmt = stmt.order_by(Business.confidence_score.desc(), name_order)
 
     rows = session.execute(stmt.offset((page - 1) * page_size).limit(page_size)).all()
+    status = session.get(IndexStatus, city_row.id)
     return {
+        "city": {
+            "slug": city_row.slug,
+            "country": city_row.country_code,
+            "name": _name(city_row, lang),
+            "last_indexed_at": (
+                status.last_indexed_at.isoformat() if status and status.last_indexed_at else None
+            ),
+        },
+        "categories": slugs,
         "results": _serialize(session, rows, lang),
         "total": total,
         "page": page,
@@ -312,6 +335,56 @@ def search_job(session: SessionDep, job_id: uuid.UUID) -> dict[str, Any]:
         "created_at": job.created_at.isoformat(),
         "finished_at": job.finished_at.isoformat() if job.finished_at else None,
     }
+
+
+def _job_state(job: Job) -> dict[str, Any]:
+    result = job.result or {}
+    return {
+        "status": job.status,
+        "sources": (result.get("progress") or result).get("sources", {}),
+        "error": job.error,
+    }
+
+
+def _sse(event: str, data: Any) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+@app.get("/api/v1/search/jobs/{job_id}/stream")
+def search_job_stream(job_id: uuid.UUID, factory: FactoryDep) -> StreamingResponse:
+    """Server-Sent Events with an index job's progress (docs/05-api.md).
+
+    Events: `progress` whenever the job's state changes, then exactly one of
+    `done`, `failed` or `timeout`. The client refetches search results on each.
+    """
+    with factory() as session:
+        if session.get(Job, job_id) is None:
+            raise HTTPException(404, "job not found")
+
+    def events() -> Iterator[str]:
+        started = last_beat = time.monotonic()
+        previous = None
+        while time.monotonic() - started < STREAM_TIMEOUT_SECONDS:
+            with factory() as session:
+                state = _job_state(session.get(Job, job_id))
+            if state != previous:
+                previous = state
+                yield _sse("progress", state)
+                last_beat = time.monotonic()
+            if state["status"] in ("done", "failed"):
+                yield _sse(state["status"], state)
+                return
+            if time.monotonic() - last_beat > STREAM_HEARTBEAT_SECONDS:
+                yield ": keep-alive\n\n"
+                last_beat = time.monotonic()
+            time.sleep(STREAM_POLL_SECONDS)
+        yield _sse("timeout", previous)
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 class ReportIn(BaseModel):

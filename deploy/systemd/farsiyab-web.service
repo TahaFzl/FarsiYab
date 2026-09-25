@@ -1,0 +1,14 @@
+[Unit]
+Description=FarsiYab website (Next.js)
+After=network-online.target farsiyab-api.service
+
+[Service]
+User=farsiyab
+WorkingDirectory=/opt/farsiyab/apps/web
+EnvironmentFile=/etc/farsiyab/farsiyab.env
+Environment=NODE_ENV=production PORT=3000
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start --hostname 127.0.0.1
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

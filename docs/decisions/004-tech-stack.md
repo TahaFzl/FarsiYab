@@ -5,13 +5,13 @@
 ## تصمیم
 | لایه | انتخاب | دلیل |
 |---|---|---|
-| فرانت‌اند | Next.js (App Router، TypeScript)، `next-intl`، Tailwind با پشتیبانی RTL | رندر سمت سرور برای SEO، پشتیبانی خوب از i18n |
+| فرانت‌اند | Next.js 16 (App Router، TypeScript)، Tailwind 4 با کلاس‌های منطقی (`ms-`/`me-`) برای RTL | رندر سمت سرور برای SEO. چندزبانگی با روش داخلی خود Next.js (`proxy.ts` + دیکشنری‌های JSON) و بدون کتابخانه‌ی اضافه |
 | فونت | Vazirmatn | فونت فارسی متن‌باز و رایگان |
 | بک‌اند | Python 3.11+، FastAPI، SQLAlchemy 2، Alembic | اکوسیستم قوی برای کراول، پردازش متن و تشخیص زبان |
 | صف کار | جدول `job` در خود PostgreSQL (`FOR UPDATE SKIP LOCKED`)؛ **بدون Redis** | یک سرویس کمتر برای نصب؛ برای حجم این پروژه کافی است |
 | دیتابیس | PostgreSQL 16 + PostGIS + `pg_trgm` | جست‌وجوی مکانی و شباهت نام در یک دیتابیس |
 | HTTP | `httpx` (async) | درخواست موازی به سورس‌ها |
-| تست | pytest + داده‌های ضبط‌شده (VCR / fixtures) | تست آداپترها بدون مصرف سهمیه |
+| تست | pytest + داده‌های ضبط‌شده؛ Playwright برای تست end-to-end سایت | تست آداپترها بدون مصرف سهمیه |
 | استقرار | نصب مستقیم روی یک VPS (Ubuntu) با systemd و Caddy؛ **بدون Docker** | ساده، بدون لایه‌ی اضافه؛ جزئیات در [02](../02-architecture.md#استقرار-بدون-docker) |
 
 ## زبان‌ها

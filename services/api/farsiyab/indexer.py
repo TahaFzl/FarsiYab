@@ -334,8 +334,11 @@ def index_city(
     check_sites: bool = True,
     settings: Settings | None = None,
     checker_factory: Callable[[], WebsiteChecker] = WebsiteChecker,
+    on_progress: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
+    """Index one city. `on_progress` receives the report so far after each stage."""
     settings = settings or get_settings()
+    notify = on_progress or (lambda report: None)
     city = session.scalar(select(City).where(City.slug == city_slug))
     if city is None:
         raise ValueError(f"unknown city: {city_slug}")
@@ -367,10 +370,13 @@ def index_city(
         if release:
             stats["release"] = release
         stats["at"] = datetime.now(UTC).isoformat()
+        notify(report)
 
     recompute_scores(session, city.id)
     session.commit()
     if check_sites:
+        report["sources"]["website"] = {"status": "running"}
+        notify(report)
         report["sources"]["website"] = check_websites(session, city, settings, checker_factory)
         recompute_scores(session, city.id)
 

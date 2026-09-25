@@ -1,0 +1,15 @@
+[Unit]
+Description=FarsiYab index worker (jobs queued by searches)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+User=farsiyab
+WorkingDirectory=/opt/farsiyab/services/api
+EnvironmentFile=/etc/farsiyab/farsiyab.env
+ExecStart=/opt/farsiyab/services/api/.venv/bin/farsiyab worker
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

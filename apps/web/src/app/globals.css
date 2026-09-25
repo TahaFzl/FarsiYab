@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Palette: turquoise (kashi tiles) and saffron, on a warm off-white. */
+:root {
+  --background: #faf8f5;
+  --surface: #ffffff;
+  --foreground: #1c1917;
+  --muted: #6b645c;
+  --border: #e7e1d8;
+  --primary: #0e7c86;
+  --primary-strong: #0a5f67;
+  --primary-soft: #e3f3f4;
+  --accent: #c8891a;
+  --accent-soft: #fbf1dc;
+  --danger: #b42318;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #14120f;
+    --surface: #1d1a16;
+    --foreground: #f3efe9;
+    --muted: #a9a198;
+    --border: #35302a;
+    --primary: #3cb4bd;
+    --primary-strong: #6fd0d7;
+    --primary-soft: #13393c;
+    --accent: #e3a93f;
+    --accent-soft: #3a2d14;
+    --danger: #f97066;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Latin names and URLs inside Persian text keep their own direction. */
+.ltr-embed {
+  unicode-bidi: isolate;
+  direction: ltr;
+}

@@ -9,6 +9,7 @@ import typer
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from farsiyab import jobs
 from farsiyab.adapters.base import SourceAdapter
@@ -18,7 +19,7 @@ from farsiyab.config import get_settings
 from farsiyab.db import session_factory, session_scope
 from farsiyab.indexer import index_city
 from farsiyab.loader import load_reference
-from farsiyab.models import City, IndexStatus
+from farsiyab.models import City, IndexStatus, Job
 
 app = typer.Typer(help="FarsiYab backend tools.", no_args_is_help=True)
 db_app = typer.Typer(help="Database setup.", no_args_is_help=True)
@@ -75,8 +76,13 @@ def build_adapters(sources: list[str], release: str | None) -> list[SourceAdapte
     return adapters
 
 
-def run_index_job(session, payload: dict) -> dict:
-    return index_city(session, payload["city"], build_adapters(list(ADAPTERS), None))
+def run_index_job(session: Session, job: Job) -> dict:
+    return index_city(
+        session,
+        job.payload["city"],
+        build_adapters(list(ADAPTERS), None),
+        on_progress=lambda report: jobs.save_progress(session_factory(), job.id, report),
+    )
 
 
 @app.command()
@@ -116,8 +122,15 @@ def worker(
 
 
 @app.command()
-def serve(host: str = "127.0.0.1", port: int = 8000, reload: bool = False) -> None:
+def serve(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    reload: bool = False,
+    access_log: Annotated[
+        bool, typer.Option(help="Log every request (includes client IPs; off for privacy)")
+    ] = False,
+) -> None:
     """Run the HTTP API."""
     import uvicorn
 
-    uvicorn.run("farsiyab.api:app", host=host, port=port, reload=reload)
+    uvicorn.run("farsiyab.api:app", host=host, port=port, reload=reload, access_log=access_log)

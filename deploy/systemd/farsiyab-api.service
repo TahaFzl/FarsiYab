@@ -1,0 +1,14 @@
+[Unit]
+Description=FarsiYab API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+User=farsiyab
+WorkingDirectory=/opt/farsiyab/services/api
+EnvironmentFile=/etc/farsiyab/farsiyab.env
+ExecStart=/opt/farsiyab/services/api/.venv/bin/farsiyab serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

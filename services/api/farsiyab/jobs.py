@@ -17,7 +17,7 @@ from farsiyab.models import Job
 log = logging.getLogger(__name__)
 
 MAX_ATTEMPTS = 3
-Handler = Callable[[Session, dict[str, Any]], dict[str, Any] | None]
+Handler = Callable[[Session, Job], dict[str, Any] | None]
 
 
 def enqueue(
@@ -71,7 +71,7 @@ def run_one(session: Session, handlers: dict[str, Handler]) -> Job | None:
     if job is None:
         return None
     try:
-        result = handlers[job.kind](session, job.payload)
+        result = handlers[job.kind](session, job)
     except Exception as exc:
         session.rollback()
         log.exception("job %s (%s) failed", job.id, job.kind)
@@ -90,6 +90,16 @@ def run_one(session: Session, handlers: dict[str, Handler]) -> Job | None:
         job.finished_at = datetime.now(UTC)
     session.commit()
     return job
+
+
+def save_progress(session_factory: Callable[[], Session], job_id: uuid.UUID, progress: Any) -> None:
+    """Store partial results on a running job from a separate, short transaction,
+    so the indexer's own transactions (and rollbacks) cannot lose it."""
+    with session_factory() as session:
+        job = session.get(Job, job_id)
+        if job is not None and job.status == "running":
+            job.result = {"progress": progress}
+            session.commit()
 
 
 def work(

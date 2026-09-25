@@ -228,7 +228,7 @@ class TestJobs:
     def test_failures_are_retried_then_marked_failed(self, db):
         jobs.enqueue(db, "boom", {})
 
-        def boom(session, payload):
+        def boom(session, job):
             raise RuntimeError("kaput")
 
         for attempt in range(1, jobs.MAX_ATTEMPTS + 1):
@@ -242,7 +242,7 @@ class TestJobs:
 
     def test_success_stores_the_result(self, db):
         jobs.enqueue(db, "ok", {"x": 1})
-        job = jobs.run_one(db, {"ok": lambda s, p: {"got": p["x"]}})
+        job = jobs.run_one(db, {"ok": lambda s, j: {"got": j.payload["x"]}})
         assert (job.status, job.result) == ("done", {"got": 1})
         assert jobs.run_one(db, {}) is None
         assert db.scalar(select(func.count(Job.id))) == 1

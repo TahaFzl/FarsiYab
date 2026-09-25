@@ -1,0 +1,95 @@
+{
+  "site": {
+    "name": "FarsiYab",
+    "tagline": "Find Iranian and Persian-speaking businesses in your city",
+    "description": "FarsiYab finds Iranian and Persian-speaking businesses outside Iran from open sources and shows where each result came from and why."
+  },
+  "nav": {
+    "search": "Search",
+    "howItWorks": "How it works",
+    "about": "About",
+    "privacy": "Privacy",
+    "switchLanguage": "فارسی"
+  },
+  "form": {
+    "country": "Country",
+    "city": "City",
+    "chooseCountry": "Choose a country",
+    "chooseCity": "Choose a city",
+    "loadingCities": "Loading cities…",
+    "categories": "What are you looking for?",
+    "categoriesHint": "One or more categories",
+    "search": "Search",
+    "needCategory": "Choose at least one category",
+    "needCity": "Choose a country and a city"
+  },
+  "results": {
+    "title": "{categories} in {city}",
+    "count": "{count} results",
+    "none": "No results for this search yet.",
+    "noneHint": "You can search Google Maps yourself:",
+    "lastIndexed": "Data for this city last updated: {date}",
+    "neverIndexed": "This city has not been searched yet.",
+    "sort": "Sort by",
+    "sortConfidence": "Confidence",
+    "sortName": "Name",
+    "minConfidence": "Minimum confidence",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "error": "Could not reach the server. Please try again in a moment."
+  },
+  "live": {
+    "queued": "Preparing a fresh search for this city…",
+    "running": "Searching sources… new results will appear automatically.",
+    "done": "Search finished. Results are up to date.",
+    "failed": "The fresh search failed; showing earlier results.",
+    "timeout": "The search is taking longer than usual; reload the page later.",
+    "sourceDone": "{source}: finished",
+    "sourceFailed": "{source}: unavailable"
+  },
+  "card": {
+    "whyIranian": "Why Iranian?",
+    "sources": "Sources",
+    "via": "via {via}",
+    "checkOn": "Check on",
+    "googleMaps": "Google Maps",
+    "appleMaps": "Apple Maps",
+    "openstreetmap": "OpenStreetMap",
+    "website": "Website",
+    "call": "Call",
+    "verified": "Last checked: {date}",
+    "report": "Report a problem",
+    "confidence": {
+      "high": "High confidence",
+      "medium": "Medium confidence",
+      "low": "Possibly Iranian"
+    }
+  },
+  "report": {
+    "title": "Report “{name}”",
+    "reason": "What is wrong?",
+    "reasons": {
+      "not_iranian": "Not Iranian or Persian-speaking",
+      "closed": "Permanently closed",
+      "wrong_info": "Wrong information",
+      "remove_request": "I own this business and want it removed"
+    },
+    "message": "Details (optional)",
+    "email": "Email for follow-up (required for removal requests)",
+    "send": "Send",
+    "cancel": "Cancel",
+    "sent": "Thank you! Your report was recorded.",
+    "failed": "Could not send. Please try again."
+  },
+  "footer": {
+    "disclaimer": "FarsiYab collects results automatically from public sources; they may be wrong or out of date. Every result shows its sources and why it is listed.",
+    "attribution": "Data © OpenStreetMap contributors and Overture Maps Foundation"
+  },
+  "notFound": "Page not found.",
+  "sources": {
+    "overture": "Overture Maps",
+    "osm": "OpenStreetMap",
+    "website": "Business websites"
+  }
+}

@@ -5,3 +5,6 @@
 caspian
 khazar
 kish
+# Not a place, but just as ambiguous: a surname ("Alex Parsi DDS", Los Angeles)
+# and the Zoroastrian community of India ("Parsi cuisine").
+parsi

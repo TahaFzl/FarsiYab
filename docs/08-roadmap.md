@@ -20,7 +20,7 @@ flowchart LR
 
 ## فاز ۱: هسته‌ی بک‌اند و سورس‌های MVP
 **زیرساخت**
-- [ ] ساختار ریپو (`services/api`)، Docker Compose (Postgres + PostGIS، Redis)، CI (lint + test)
+- [ ] ساختار ریپو (`services/api`)، `scripts/setup_db.sh` (Postgres + PostGIS)، راهنمای نصب محلی در README، CI (lint + test)
 - [ ] مدل داده و migration ها (Alembic)
 - [ ] بارگذاری `data/sources.yaml` در جدول `source`، و `data/categories.yaml`
 - [ ] کشورها و شهرهای MVP از GeoNames، و bbox شهرها از Nominatim
@@ -49,7 +49,7 @@ flowchart LR
 - [ ] اتصال SSE برای ایندکس لایو شهرهای جدید
 - [ ] دکمه‌ی گزارش اشتباه
 - [ ] صفحه‌های «درباره»، «نحوه‌ی جمع‌آوری داده» و «حریم خصوصی»
-- [ ] استقرار اولیه روی VPS
+- [ ] استقرار اولیه روی VPS (systemd + Caddy، فایل‌ها در `deploy/`)
 
 **معیار اتمام:** یک کاربر واقعی از موبایل، تورنتو و رستوران را انتخاب کند و نتایج را با مدرک و لینک ببیند.
 

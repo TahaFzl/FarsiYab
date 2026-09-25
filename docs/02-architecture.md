@@ -143,12 +143,26 @@ FarsiYab/
 │       │   └── api/
 │       └── tests/
 ├── data/                    # لیست شهرها، دسته‌ها، واژه‌نامه‌ها
-├── docs/
-└── docker-compose.yml       # postgres, redis, api, worker, web
+├── deploy/                  # فایل‌های systemd و تنظیمات Caddy برای سرور
+├── scripts/                 # setup_db.sh: ساخت دیتابیس و فعال‌سازی PostGIS
+└── docs/
 ```
 
-## استقرار
+## استقرار (بدون Docker)
 
-- MVP روی یک VPS ارزان با Docker Compose
+پروژه از Docker استفاده نمی‌کند. همه‌ی سرویس‌ها مستقیم روی سیستم‌عامل نصب می‌شوند.
+
+**توسعه‌ی محلی**
+- PostgreSQL 16 + PostGIS و Redis از پکیج‌منیجر سیستم‌عامل نصب می‌شوند (`apt` در لینوکس، `brew` در مک؛ در ویندوز از installer رسمی PostgreSQL با StackBuilder برای PostGIS، و Redis از طریق WSL یا Memurai)
+- بک‌اند: Python با محیط مجازی (`uv` یا `venv`)
+- فرانت‌اند: Node.js LTS و `npm`
+- `scripts/setup_db.sh` دیتابیس و کاربر را می‌سازد، افزونه‌های `postgis` و `pg_trgm` را فعال می‌کند و migration ها را اجرا می‌کند
+- مراحل نصب در README ریپو نوشته می‌شود
+
+**سرور (VPS)**
+- همان نصب مستقیم روی Ubuntu LTS
+- هر سرویس یک unit در systemd دارد (`farsiyab-api`، `farsiyab-worker`، `farsiyab-scheduler` و `farsiyab-web`). فایل‌ها در `deploy/systemd/` هستند.
+- Caddy به‌عنوان reverse proxy و برای HTTPS خودکار
+- آپدیت سرور: `git pull`، نصب وابستگی‌ها، اجرای migration ها و `systemctl restart`
 - PostgreSQL با افزونه‌های PostGIS و `pg_trgm` (برای شباهت نام)
 - لاگ و مانیتورینگ مصرف سهمیه در پنل ادمین

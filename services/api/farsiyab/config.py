@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://farsiyab:farsiyab@localhost:5432/farsiyab"
     data_dir: Path = REPO_ROOT / "data"
+    # Crawl caches (directories are re-read at most weekly).
+    cache_dir: Path = Path.home() / ".cache" / "farsiyab"
 
     # Identifies the crawler to the sites it visits (docs/07-legal-and-privacy.md).
     bot_url: str = "https://github.com/TahaFzl/FarsiYab"

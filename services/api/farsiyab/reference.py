@@ -51,6 +51,26 @@ def load_regions(data_dir: Path | None = None) -> dict[str, list[str]]:
     return {c["slug"]: c.get("regions", []) for c in _load("cities.yaml", data_dir)["cities"]}
 
 
+def load_registry_links(data_dir: Path | None = None) -> list[dict[str, Any]]:
+    return _load("registry_links.yaml", data_dir)["registries"]
+
+
+def registry_links_for(
+    city_regions: list[str], country: str, categories: list[str], data_dir: Path | None = None
+) -> list[dict[str, Any]]:
+    """Registries covering this city and at least one requested category (children
+    included: asking for "doctor" also shows dentist registries)."""
+    wanted = set(categories)
+    matches = []
+    for registry in load_registry_links(data_dir):
+        regions = set(registry["regions"])
+        covers = bool(regions & set(city_regions)) or f"country:{country}" in regions
+        relevant = any(c in wanted or c.split("/")[0] in wanted for c in registry["categories"])
+        if covers and relevant:
+            matches.append(registry)
+    return matches
+
+
 def load_sources(data_dir: Path | None = None) -> list[dict[str, Any]]:
     return _load("sources.yaml", data_dir)["sources"]
 

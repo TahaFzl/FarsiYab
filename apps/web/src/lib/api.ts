@@ -73,6 +73,15 @@ export interface SearchResponse {
   page: number;
   page_size: number;
   live_search: { job_id: string; status: string } | null;
+  registry_links: RegistryLink[];
+}
+
+/** An official registry to check the user can search themselves (link only, never crawled). */
+export interface RegistryLink {
+  id: string;
+  name: string;
+  url: string;
+  hint: string;
 }
 
 export interface SearchParams {

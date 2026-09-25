@@ -126,6 +126,23 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
         </ol>
       )}
 
+      {data.registry_links.length > 0 && (
+        <aside className="space-y-2 rounded-2xl border border-border p-4 text-sm">
+          <h2 className="font-bold">{dict.results.registries}</h2>
+          <p className="text-muted">{dict.results.registriesHint}</p>
+          <ul className="space-y-2">
+            {data.registry_links.map((r) => (
+              <li key={r.id}>
+                <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                  {r.name} ↗
+                </a>
+                <p className="text-muted">{r.hint}</p>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+
       {pages > 1 && (
         <nav className="flex items-center justify-between text-sm">
           {query.page! > 1 ? (

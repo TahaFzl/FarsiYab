@@ -65,6 +65,12 @@ test("report dialog sends a report", async ({ page }, info) => {
   await expect(dialog.getByText("ممنون! گزارش شما ثبت شد.")).toBeVisible();
 });
 
+test("official registries are linked for the city and category", async ({ page }) => {
+  await page.goto("/fa/search?country=CA&city=toronto&categories=doctor");
+  const box = page.getByRole("complementary").filter({ hasText: "سامانه‌های رسمی برای بررسی" });
+  await expect(box.getByRole("link", { name: /CPSO/ })).toHaveAttribute("href", /cpso\.on\.ca/);
+});
+
 test("static pages render", async ({ page }) => {
   for (const [path, heading] of [
     ["/fa/how-it-works", "فارسی‌یاب چطور کار می‌کند؟"],

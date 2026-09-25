@@ -1,7 +1,7 @@
 # دایرکتوری‌های ایرانی
 
 - **شناسه در کد:** `directory:<slug>` (هر دایرکتوری یک شناسه‌ی جدا دارد)
-- **وضعیت:** 🔍 **کاندیدها شناسایی شده‌اند؛ ToS هیچ‌کدام هنوز بررسی نشده است**
+- **وضعیت:** ✅ **بررسی شد (۲۰۲۶-۰۹-۲۵)؛ دو دایرکتوری کراول می‌شوند (`directory:bazaarche` و `directory:iranianbusinesscenter`)، بقیه فقط لینک یا رد**
 - **حساب کاربری:** ❌ لازم نیست (صفحات عمومی)
 - **نوع دسترسی:** به ترتیب اولویت: ۱) **همکاری مستقیم** (فایل یا API با اجازه‌ی صاحب سایت) ۲) کراول صفحات عمومی در صورتی که ToS و `robots.txt` اجازه بدهند ۳) فقط لینک
 
@@ -10,42 +10,42 @@
 
 ## کاندیدهای شناسایی‌شده (۲۰۲۶-۰۹)
 
-> این لیست از جست‌وجوی وب به دست آمده و **هیچ‌کدام هنوز بررسی نشده‌اند**. ستون «تصمیم» بعد از تکمیل چک‌لیست پایین پر می‌شود.
+> بررسی در ۲۰۲۶-۰۹-۲۵ انجام شد: `robots.txt`، صفحه‌ی ToS یا Terms، حوزه‌ی قضایی و اینکه صفحات بدون JavaScript باز می‌شوند یا نه. «در دسترس نبود» یعنی از سرور ما خطا یا 403 برگرداند؛ دوباره بررسی می‌شوند. برای همه‌ی موارد 🔗 ایمیل پیشنهاد همکاری (فایل یا API با ذکر منبع) پیشنهاد می‌شود.
 
 ### آمریکا
 | نام | URL | پوشش | تصمیم |
 |---|---|---|---|
-| Iranian Yellow Pages (Ketab) | https://www.ketab.com/yellow.aspx | جنوب کالیفرنیا؛ بیش از ۲۵۰۰ آگهی؛ نسخه‌ی چاپی قدیمی | — |
-| Persia Page | https://persiapage.com | آمریکا، انگلستان، سوئد، استرالیا و ... | — |
-| Iranian Business Center | https://iranianbusinesscenter.com | کالیفرنیا | — |
-| Iranian Business Direct | https://www.iranianbusinessdirect.com | آمریکا و تورنتو | — |
-| OCIACC Directory | https://ociacc.com | Orange County (اتاق بازرگانی) | — |
-| IIranian | https://iiranian.com | — | — |
+| Iranian Yellow Pages (Ketab) | https://www.ketab.com/yellow.aspx | جنوب کالیفرنیا؛ بیش از ۲۵۰۰ آگهی؛ نسخه‌ی چاپی قدیمی | ❌ در دسترس نبود (خطا / 403) — بعداً دوباره بررسی شود |
+| Persia Page | https://persiapage.com | آمریکا، انگلستان، سوئد، استرالیا و ... | 🔗 فقط لینک — ToS: «may not commercially exploit» |
+| Iranian Business Center | https://iranianbusinesscenter.com | کالیفرنیا | ✅ کراول — ToS ندارد؛ robots اجازه می‌دهد؛ sitemap + JSON-LD |
+| Iranian Business Direct | https://www.iranianbusinessdirect.com | آمریکا و تورنتو | ❌ در دسترس نبود |
+| OCIACC Directory | https://ociacc.com | Orange County (اتاق بازرگانی) | 🔗 فقط لینک — اعلامیه‌ی کپی‌رایت روی فهرست |
+| IIranian | https://iiranian.com | — | ❌ در دسترس نبود |
 
 ### کانادا
 | نام | URL | پوشش | تصمیم |
 |---|---|---|---|
-| Bazaarche | https://bazaarche.ca | تورنتو و ونکوور | — |
-| Little Persia | https://littlepersia.ca | تورنتو، مونترال، کلگری، ونکوور | — |
-| KIKOJA | https://www.kikoja.ca | کانادا | — |
-| Lawyers Who Speak | https://lawyerswhospeak.ca | وکلای چندزبانه (فیلتر فارسی) | — |
+| Bazaarche | https://bazaarche.ca | تورنتو و ونکوور | ✅ کراول — ToS ندارد؛ robots اجازه می‌دهد؛ sitemap |
+| Little Persia | https://littlepersia.ca | تورنتو، مونترال، کلگری، ونکوور | 🔗 فقط لینک — ToS جمع‌آوری خودکار را صریحاً ممنوع کرده |
+| KIKOJA | https://www.kikoja.ca | کانادا | ❌ فقط با JavaScript / چالش ضدربات |
+| Lawyers Who Speak | https://lawyerswhospeak.ca | وکلای چندزبانه (فیلتر فارسی) | 🔗 فقط لینک — ToS جمع‌آوری خودکار را ممنوع کرده |
 
 ### اروپا
 | نام | URL | پوشش | تصمیم |
 |---|---|---|---|
-| Parsian | http://parsian.eu | آلمان، اتریش، سوئیس | — |
-| IraniLink | https://iranilink.co.uk | انگلستان (۱۲ شهر) | — |
-| Best Iranian | https://www.bestiranian.com | لندن | — |
-| Nazdikia | https://nazdikia.com | لندن | — |
-| Iran Page | https://www.iranpage.com | لندن و ... | — |
+| Parsian | http://parsian.eu | آلمان، اتریش، سوئیس | 🔗 فقط لینک / همکاری — حق پایگاه داده‌ی اتحادیه‌ی اروپا |
+| IraniLink | https://iranilink.co.uk | انگلستان (۱۲ شهر) | 🔗 فقط لینک / همکاری — حق پایگاه داده‌ی انگلستان |
+| Best Iranian | https://www.bestiranian.com | لندن | 🔗 فقط لینک — انگلستان (حق پایگاه داده)؛ در دسترس هم نبود |
+| Nazdikia | https://nazdikia.com | لندن | 🔗 فقط لینک / همکاری — حق پایگاه داده‌ی انگلستان |
+| Iran Page | https://www.iranpage.com | لندن و ... | 🔗 فقط لینک — انگلستان؛ در دسترس هم نبود |
 
 ### استرالیا
 | نام | URL | پوشش | تصمیم |
 |---|---|---|---|
-| Hamshahri | https://www.hamshahri.com.au | استرالیا | — |
-| 0098listing | https://0098listing.com/au/ | استرالیا | — |
-| Persian Biz | https://persianbiz.info | استرالیا | — |
-| Persian Network | https://persiannetwork.com.au/directory | استرالیا | — |
+| Hamshahri | https://www.hamshahri.com.au | استرالیا | ❌ فقط با JavaScript / چالش ضدربات |
+| 0098listing | https://0098listing.com/au/ | استرالیا | ❌ فقط با JavaScript / چالش ضدربات |
+| Persian Biz | https://persianbiz.info | استرالیا | 🔗 فقط لینک — ToS ممنوع کرده و داده‌اش از Google Places است |
+| Persian Network | https://persiannetwork.com.au/directory | استرالیا | ❌ فقط با JavaScript / چالش ضدربات |
 
 ### اتاق‌های بازرگانی و انجمن‌ها
 - Deutsch-Iranische Handelskammer (هامبورگ)
@@ -77,7 +77,10 @@
 - User-Agent شفاف (`FarsiYabBot`) و رعایت `robots.txt` و `Crawl-delay`
 - استفاده از `sitemap.xml` در صورت وجود (به‌جای دنبال کردن همه‌ی لینک‌ها)
 - حداکثر ۱ درخواست در ثانیه برای هر دامنه و فقط یک بار در هفته
-- هر دایرکتوری یک parser جداگانه در `adapters/directories/<slug>.py` با تست روی HTML ذخیره‌شده دارد
+- هر دایرکتوری یک کلاس `Directory` با متد `parse` در `farsiyab/adapters/directories.py` دارد و روی HTML نمونه تست می‌شود
+- نتیجه‌ی کراول یک هفته در `~/.cache/farsiyab/<id>.json` نگه داشته می‌شود، پس ایندکس چند شهر فقط یک کراول لازم دارد
+- فقط نام، لینک‌های خود کسب‌وکار، تلفن، مختصات و لینک صفحه ذخیره می‌شود؛ متن توضیحات فقط برای تشخیص خوانده می‌شود و ذخیره نمی‌شود
+- حساب‌های شبکه‌ی اجتماعی خود دایرکتوری (در header و footer هر صفحه) کنار گذاشته می‌شوند
 
 ## لینک به کاربر
 لینک صفحه‌ی همان کسب‌وکار در دایرکتوری. در حالت «فقط لینک»، لینک صفحه‌ی شهر و دسته.

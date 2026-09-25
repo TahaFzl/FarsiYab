@@ -34,6 +34,7 @@ from farsiyab.models import (
     Source,
     SourceRecord,
 )
+from farsiyab.reference import load_regions, registry_links_for
 
 Lang = Literal["fa", "en"]
 MIN_SCORE = {"low": 0.25, "medium": 0.45, "high": 0.75}
@@ -312,6 +313,17 @@ def search(
             ),
         },
         "categories": slugs,
+        "registry_links": [
+            {
+                "id": r["id"],
+                "name": r["name_fa"] if lang == "fa" else r["name_en"],
+                "url": r["url"],
+                "hint": r["hint_fa"] if lang == "fa" else r["hint_en"],
+            }
+            for r in registry_links_for(
+                load_regions().get(city_row.slug, []), city_row.country_code, slugs
+            )
+        ],
         "results": _serialize(session, rows, lang),
         "total": total,
         "page": page,

@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from farsiyab import jobs
 from farsiyab.adapters.base import SourceAdapter, SourceUnavailable
+from farsiyab.adapters.directories import DIRECTORIES, DirectoryAdapter
 from farsiyab.adapters.government import (
     CraAdapter,
     IrsAdapter,
@@ -58,6 +59,10 @@ ADAPTERS: dict[str, AdapterFactory] = {
     "gov:toronto_business": lambda release: TorontoAdapter(_geocoder()),
     "gov:irs_eo_bmf": lambda release: IrsAdapter(load_regions(), _geocoder()),
     "gov:cra_charities": lambda release: CraAdapter(load_regions(), _geocoder()),
+    **{
+        directory_id: (lambda release, d=directory: DirectoryAdapter(d()))
+        for directory_id, directory in DIRECTORIES.items()
+    },
 }
 
 

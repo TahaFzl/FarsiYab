@@ -1,0 +1,73 @@
+# Official registries that list the languages a professional speaks.
+# They are link-only: FarsiYab does not read their data (terms, robots.txt or the
+# personal nature of the records; review in docs/sources/professional-registries.md).
+# The site shows these links next to results for the matching city and category.
+#
+# regions: states/provinces (same codes as cities.yaml, quoted) or a country code
+# prefixed with "country:" for nationwide registries.
+
+registries:
+  - id: cpso
+    name_fa: کالج پزشکان و جراحان انتاریو (CPSO)
+    name_en: College of Physicians and Surgeons of Ontario (CPSO)
+    url: https://register.cpso.on.ca/Advanced-Search/
+    regions: ["ON"]
+    categories: [doctor]
+    hint_fa: در «Languages spoken» زبان Farsi یا Persian را انتخاب کنید.
+    hint_en: Pick Farsi or Persian under “Languages spoken”.
+  - id: rcdso
+    name_fa: کالج دندان‌پزشکان انتاریو (RCDSO)
+    name_en: Royal College of Dental Surgeons of Ontario (RCDSO)
+    url: https://www.rcdso.org/find-a-dentist
+    regions: ["ON"]
+    categories: [doctor/dentist]
+    hint_fa: در جست‌وجو، زبان Farsi را انتخاب کنید.
+    hint_en: Filter by the Farsi language.
+  - id: cmq
+    name_fa: کالج پزشکان کبک (CMQ)
+    name_en: Collège des médecins du Québec (CMQ)
+    url: https://www.cmq.org/fr/bottin
+    regions: ["QC"]
+    categories: [doctor]
+    hint_fa: در فهرست پزشکان، زبان (langue) فارسی را انتخاب کنید.
+    hint_en: Pick Persian (persan) as the language in the directory.
+  - id: calbar
+    name_fa: کانون وکلای کالیفرنیا (State Bar of California)
+    name_en: State Bar of California – Attorney Search
+    url: https://apps.calbar.ca.gov/attorney/LicenseeSearch/AdvancedSearch
+    regions: ["CA"]
+    categories: [lawyer]
+    hint_fa: در جست‌وجوی پیشرفته، «Language Spoken» را Farsi بگذارید (خوداظهاری وکلا).
+    hint_en: Set “Language Spoken” to Farsi in Advanced Search (self-reported).
+  - id: texasbar
+    name_fa: کانون وکلای تگزاس (State Bar of Texas)
+    name_en: State Bar of Texas – Find a Lawyer
+    url: https://www.texasbar.com/AM/Template.cfm?Section=Find_A_Lawyer&Template=/CustomSource/MemberDirectory/Search_Form_Client_Main.cfm
+    regions: ["TX"]
+    categories: [lawyer]
+    hint_fa: زبان Farsi را در فرم جست‌وجو انتخاب کنید.
+    hint_en: Choose Farsi as the language in the search form.
+  - id: arztsuche116117
+    name_fa: جست‌وجوی پزشک 116117 (آلمان)
+    name_en: 116117 Arztsuche (Germany)
+    url: https://arztsuche.116117.de/
+    regions: ["country:DE"]
+    categories: [doctor, doctor/dentist]
+    hint_fa: در فیلتر «Fremdsprachen»، زبان Persisch را انتخاب کنید.
+    hint_en: Pick Persisch under “Fremdsprachen” (foreign languages).
+  - id: bdue
+    name_fa: انجمن مترجمان آلمان (BDÜ)
+    name_en: BDÜ – German translators' association
+    url: https://suche.bdue.de/
+    regions: ["country:DE"]
+    categories: [translator]
+    hint_fa: زبان Persisch/Farsi یا Dari را انتخاب کنید.
+    hint_en: Choose Persisch/Farsi or Dari.
+  - id: justiz_dolmetscher
+    name_fa: فهرست رسمی مترجمان قسم‌خورده‌ی دادگاه‌های آلمان
+    name_en: German courts' sworn interpreters and translators database
+    url: https://www.justiz-dolmetscher.de/Recherche/de/Suchen
+    regions: ["country:DE"]
+    categories: [translator]
+    hint_fa: زبان Persisch را انتخاب کنید.
+    hint_en: Choose Persisch as the language.

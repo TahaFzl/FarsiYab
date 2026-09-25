@@ -28,6 +28,8 @@
     "count": "{count} results",
     "none": "No results for this search yet.",
     "noneHint": "You can search Google Maps yourself:",
+    "registries": "Official registries you can check",
+    "registriesHint": "These official directories let you filter by spoken language. We only link to them; their data is not copied into FarsiYab.",
     "lastIndexed": "Data for this city last updated: {date}",
     "neverIndexed": "This city has not been searched yet.",
     "sort": "Sort by",

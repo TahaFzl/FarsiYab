@@ -103,7 +103,7 @@ def test_source_registry_is_consistent():
     ids = [s["id"] for s in sources]
     assert len(ids) == len(set(ids))
     for s in sources:
-        assert s["status"] in {"mvp", "planned", "candidate", "optional"}
+        assert s["status"] in {"mvp", "planned", "candidate", "optional", "deferred", "rejected"}
         # ADR-005: nothing before phase 6 may need an account.
         assert not s["account_required"] or s["phase"] == 6, s["id"]
 

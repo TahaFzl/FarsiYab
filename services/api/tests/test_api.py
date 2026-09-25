@@ -121,6 +121,16 @@ def test_unindexed_city_queues_one_job(client):
     assert client.get("/api/v1/search/jobs/00000000-0000-0000-0000-000000000000").status_code == 404
 
 
+def test_registry_links_follow_city_and_category(client, toronto_data):
+    doctors = search(client, categories="doctor")["registry_links"]
+    assert [r["id"] for r in doctors] == ["cpso", "rcdso"]  # dentists are doctors' children
+    assert doctors[0]["hint"].startswith("در «Languages spoken»")
+    assert search(client, categories="restaurant")["registry_links"] == []
+    hamburg = client.get("/api/v1/search", params={
+        "country": "DE", "city": "hamburg", "categories": "translator", "lang": "en"}).json()
+    assert [r["id"] for r in hamburg["registry_links"]] == ["bdue", "justiz_dolmetscher"]
+
+
 def test_search_includes_city_and_index_time(client, toronto_data):
     body = search(client, categories="doctor", lang="en")
     assert body["city"]["name"] == "Toronto" and body["city"]["last_indexed_at"]

@@ -1,0 +1,8 @@
+# Suffixes typical of Iranian surnames. Weak signal only (weight 0.2), never
+# enough on its own to show a result (docs/04-iranian-detection.md).
+# "nia" and "far" are deliberately absent: they match California, Stanfar, ...
+zadeh
+pour
+nejad
+nezhad
+fard

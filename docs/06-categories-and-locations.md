@@ -20,7 +20,7 @@
 | `translator` | ترجمه و دارالترجمه | `b2b_office_and_professional_service` (+ taxonomy `translation_service`؛ بررسی شود) | `office=translator` | — | Farsi translator, مترجم رسمی فارسی |
 | `other` | سایر | بقیه | — | — | — |
 
-مقادیر `basic_category` از داده‌ی واقعی تورنتو (release `2026-08-19.0`) استخراج شده‌اند. برای رستوران‌ها، `taxonomy.primary = persian_restaurant` در release `2026-09-23.1` وجود دارد (۵۴ مورد در تورنتو). قبل از پیاده‌سازی، لیست کامل taxonomy از مستندات Overture گرفته شود.
+نگاشت در [`data/categories.yaml`](../data/categories.yaml) است و مقادیرش با داده‌ی واقعی تورنتو (release `2026-09-23.1`) تطبیق داده شده‌اند. ترتیب تطبیق: اول `taxonomy.hierarchy` (از جزئی‌ترین سطح)، بعد `basic_category`. ستون Overture در جدول بالا خلاصه است؛ مرجع اصلی همان فایل YAML است.
 
 \* قبل از استفاده، وجود نوع `persian_restaurant` در لیست رسمی types نسخه‌ی New بررسی شود. اگر وجود نداشت، از `restaurant` به همراه `textQuery="Persian restaurant"` استفاده می‌شود.
 
@@ -28,8 +28,9 @@
 
 ## کشورها و شهرها
 
-- **منبع داده:** [GeoNames](https://www.geonames.org/) (فایل `cities15000`، رایگان با لایسنس CC BY 4.0). مختصات مرکز شهرها و نام‌های جایگزین از همین فایل می‌آید.
-- **محدوده‌ی شهر (bbox):** از Nominatim (OpenStreetMap) و فقط یک بار برای هر شهر گرفته و ذخیره می‌شود (با رعایت سقف ۱ درخواست در ثانیه).
+- **MVP:** شهرها در [`data/cities.yaml`](../data/cities.yaml) به‌صورت دستی تعریف شده‌اند، با bbox که **کل منطقه‌ی شهری** را می‌پوشاند و فقط محدوده‌ی رسمی شهر نیست (مثلاً North York و Richmond Hill برای تورنتو، یا Irvine برای لس‌آنجلس). اضافه کردن شهر: یک ردیف در این فایل و اجرای `farsiyab db load`.
+- **گسترش (فاز ۵):** [GeoNames](https://www.geonames.org/) (فایل `cities15000`، رایگان با لایسنس CC BY 4.0) برای مختصات و نام‌های جایگزین.
+- **محدوده‌ی شهر (bbox) در فاز ۵:** از Nominatim (OpenStreetMap)، فقط یک بار برای هر شهر و با رعایت سقف ۱ درخواست در ثانیه.
 - **نام فارسی شهرها:** از `alternateNames` در GeoNames یا برچسب `name:fa` در OSM؛ در صورت نبودن، به‌صورت دستی وارد می‌شود.
 
 ### شهرهای MVP

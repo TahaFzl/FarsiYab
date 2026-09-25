@@ -1,0 +1,79 @@
+# MVP countries and cities (docs/06-categories-and-locations.md).
+#
+# bbox is [west, south, east, north] in WGS84 and deliberately covers the
+# metro area, not just the city limits, because Iranian businesses cluster in
+# suburbs (e.g. North York / Richmond Hill for Toronto, Westwood / Irvine for LA).
+# Adding a city: append an entry here and run `farsiyab db load`.
+
+countries:
+  - code: US
+    name_fa: آمریکا
+    name_en: United States
+  - code: CA
+    name_fa: کانادا
+    name_en: Canada
+  - code: DE
+    name_fa: آلمان
+    name_en: Germany
+
+cities:
+  - slug: los-angeles
+    country: US
+    name_fa: لس‌آنجلس
+    name_en: Los Angeles
+    center: [-118.2437, 34.0522]
+    bbox: [-118.95, 33.60, -117.65, 34.35]
+  - slug: bay-area
+    country: US
+    name_fa: بی‌اریا (سان‌فرانسیسکو و سن‌خوزه)
+    name_en: San Francisco Bay Area
+    center: [-122.0322, 37.5485]
+    bbox: [-122.55, 37.20, -121.75, 37.95]
+  - slug: houston
+    country: US
+    name_fa: هیوستون
+    name_en: Houston
+    center: [-95.3698, 29.7604]
+    bbox: [-95.80, 29.50, -95.00, 30.15]
+  - slug: washington-dc
+    country: US
+    name_fa: واشنگتن دی‌سی
+    name_en: Washington, D.C.
+    center: [-77.0369, 38.9072]
+    bbox: [-77.45, 38.70, -76.85, 39.15]
+  - slug: toronto
+    country: CA
+    name_fa: تورنتو
+    name_en: Toronto
+    center: [-79.3832, 43.6532]
+    bbox: [-79.70, 43.55, -79.10, 43.95]
+  - slug: vancouver
+    country: CA
+    name_fa: ونکوور
+    name_en: Vancouver
+    center: [-123.1207, 49.2827]
+    bbox: [-123.30, 49.00, -122.70, 49.40]
+  - slug: montreal
+    country: CA
+    name_fa: مونترال
+    name_en: Montreal
+    center: [-73.5673, 45.5017]
+    bbox: [-73.98, 45.40, -73.47, 45.71]
+  - slug: hamburg
+    country: DE
+    name_fa: هامبورگ
+    name_en: Hamburg
+    center: [9.9937, 53.5511]
+    bbox: [9.73, 53.39, 10.33, 53.74]
+  - slug: berlin
+    country: DE
+    name_fa: برلین
+    name_en: Berlin
+    center: [13.4050, 52.5200]
+    bbox: [13.08, 52.33, 13.77, 52.68]
+  - slug: frankfurt
+    country: DE
+    name_fa: فرانکفورت
+    name_en: Frankfurt
+    center: [8.6821, 50.1109]
+    bbox: [8.47, 50.01, 8.80, 50.23]

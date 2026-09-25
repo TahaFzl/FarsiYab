@@ -1,0 +1,38 @@
+# Iranian cities, regions and national symbols used in business names.
+tehran
+teheran
+shiraz
+isfahan
+esfahan
+tabriz
+mashhad
+kerman
+yazd
+rasht
+qazvin
+hamadan
+persepolis
+pasargad
+pasargadae
+pars
+parsian
+persia
+zagros
+alborz
+damavand
+shemiran
+tajrish
+# Persian script
+تهران
+شیراز
+اصفهان
+تبریز
+مشهد
+کرمان
+یزد
+رشت
+پارس
+پرسپولیس
+تخت جمشید
+البرز
+دماوند

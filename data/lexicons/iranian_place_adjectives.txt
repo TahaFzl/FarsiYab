@@ -1,0 +1,13 @@
+# Adjective forms of Iranian places. They are common surnames, so they only
+# count as a weak `persian_personal_name` signal ("Cars With Shirazi").
+tehrani
+shirazi
+esfahani
+isfahani
+tabrizi
+mashhadi
+kermani
+yazdi
+rashti
+qazvini
+hamadani

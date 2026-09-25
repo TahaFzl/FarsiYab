@@ -1,0 +1,14 @@
+# Signals that the business is probably not Iranian. Each multiplies the
+# score by (1 - 0.3) once, regardless of how many match.
+# Armenian and Kurdish are deliberately absent: both are Iranian communities.
+afghan
+afghani
+afghanistan
+turkish
+lebanese
+syrian
+iraqi
+arabic
+arab
+pakistani
+indian

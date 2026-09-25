@@ -1,0 +1,140 @@
+# Categories and how each source's own types map onto them
+# (docs/06-categories-and-locations.md).
+#
+# overture.taxonomy       values matched against `taxonomy.hierarchy` (most specific)
+# overture.basic_category values of `basic_category` (fallback)
+# osm                     "key=value" tag matchers; "key=*" matches any value
+# Values were checked against real Overture data for Toronto (release 2026-09-23.1).
+# Matching: every category's taxonomy list is tried before any basic_category
+# list; within one pass the first category in this file wins, so children
+# (doctor/dentist) are listed before their parents (doctor).
+
+categories:
+  - slug: restaurant
+    name_fa: رستوران و کافه
+    name_en: Restaurants & cafés
+    mvp: true
+    overture:
+      taxonomy: [persian_restaurant, middle_eastern_restaurant, afghani_restaurant]
+      basic_category: [restaurant, fast_food_restaurant, cafe, coffee_shop, casual_eatery, food_service, food_truck_stand, food_court, non_alcoholic_beverage_venue, smoothie_juice_bar]
+    osm: [amenity=restaurant, amenity=cafe, amenity=fast_food, amenity=ice_cream]
+
+  - slug: bakery
+    name_fa: نانوایی و شیرینی‌فروشی
+    name_en: Bakeries & pastry
+    mvp: true
+    overture:
+      taxonomy: [bakery, dessert_shop]
+      basic_category: []
+    osm: [shop=bakery, shop=pastry, shop=confectionery]
+
+  - slug: grocery
+    name_fa: سوپرمارکت و مواد غذایی
+    name_en: Grocery stores
+    mvp: true
+    overture:
+      taxonomy: [grocery_store, international_grocery_store, organic_grocery_store, wholesale_grocer]
+      basic_category: [food_and_beverage_store, superstore, convenience_store, warehouse_club_store]
+    osm: [shop=supermarket, shop=convenience, shop=greengrocer, shop=deli, shop=spices, shop=nuts]
+
+  - slug: doctor/dentist
+    name_fa: دندان‌پزشک
+    name_en: Dentists
+    parent: doctor
+    mvp: true
+    overture:
+      taxonomy: [general_dentistry, cosmetic_dentistry, orthodontics, pediatric_dentistry]
+      basic_category: [dental_clinic]
+    osm: [amenity=dentist, healthcare=dentist]
+
+  - slug: doctor
+    name_fa: پزشک
+    name_en: Doctors & clinics
+    mvp: true
+    overture:
+      taxonomy: [doctors_office, walk_in_clinic, pediatric_clinic, public_health_clinic, fertility_clinic, primary_care_or_general_clinic]
+      basic_category:
+        - outpatient_care_facility
+        - medical_service
+        - health_care
+        - primary_care_or_general_clinic
+        - specialized_health_care
+        - specialized_medical_facility
+        - walk_in_clinic
+        - pediatric_clinic
+        - behavioral_or_mental_health_clinic
+        - vision_or_eye_care_clinic
+        - physical_medicine_and_rehabilitation
+    osm: [amenity=doctors, amenity=clinic, healthcare=*]
+
+  - slug: lawyer
+    name_fa: وکیل و مهاجرت
+    name_en: Lawyers & immigration
+    mvp: true
+    overture:
+      taxonomy: [immigration_law, immigration_and_naturalization_office, real_estate_law, tax_law, civil_rights_lawyer]
+      basic_category: [attorney_or_law_firm, legal_service]
+    osm: [office=lawyer, office=notary]
+
+  - slug: real_estate
+    name_fa: مشاور املاک
+    name_en: Real estate
+    mvp: true
+    overture:
+      taxonomy: [real_estate_agent, commercial_real_estate]
+      basic_category: [real_estate_service]
+    osm: [office=estate_agent]
+
+  - slug: beauty
+    name_fa: آرایشگاه و زیبایی
+    name_en: Beauty & hair
+    mvp: true
+    overture:
+      taxonomy: [beauty_salon, hair_salon, nail_salon, barber]
+      basic_category: [personal_or_beauty_service, personal_care_and_beauty_store]
+    osm: [shop=hairdresser, shop=beauty, shop=cosmetics]
+
+  - slug: accounting
+    name_fa: حسابداری و مالیات
+    name_en: Accounting & tax
+    mvp: false
+    overture:
+      taxonomy: [accountant, tax_service, bookkeeper]
+      basic_category: []
+    osm: [office=accountant, office=tax_advisor]
+
+  - slug: translator
+    name_fa: ترجمه و دارالترجمه
+    name_en: Translators
+    mvp: false
+    overture:
+      taxonomy: [translating_and_interpreting_service, translation_service]
+      basic_category: []
+    osm: [office=translator]
+
+  - slug: education
+    name_fa: آموزش و کلاس فارسی
+    name_en: Education & Persian classes
+    mvp: false
+    overture:
+      taxonomy: [language_school, tutoring_service, private_tutor, day_care_preschool, preschool, school, private_school, elementary_school]
+      basic_category: [specialty_school, tutoring_service, educational_service, place_of_learning, preschool]
+    osm: [amenity=school, amenity=language_school, amenity=kindergarten]
+
+  - slug: community
+    name_fa: انجمن‌ها و مراکز فرهنگی
+    name_en: Community & cultural centres
+    mvp: false
+    overture:
+      taxonomy: [social_or_community_service, community_center, cultural_center, religious_organization]
+      basic_category: [social_or_community_service, community_center, religious_organization, civic_organization, community_and_government]
+    osm: [amenity=community_centre, amenity=place_of_worship, amenity=social_centre, club=*]
+
+  - slug: other
+    name_fa: سایر
+    name_en: Other
+    mvp: true
+    overture:
+      taxonomy: []
+      basic_category: []
+    osm: []

@@ -1,0 +1,27 @@
+# Product nouns. When a text contains one of these, the adjectival keywords
+# listed in product_adjectives.txt ("Persian", "persisch", "persan", ...) describe
+# the product, not the owner ("Persian Bokhara Rug Co", "Persian cat breeder"),
+# and the weaker `persian_product_term` signal is emitted instead of
+# `explicit_keyword`. "Iranian", "Farsi" and Persian-script keywords are not affected.
+rug
+rugs
+carpet
+carpets
+kilim
+kilims
+teppich
+teppiche
+tapis
+cat
+cats
+kitten
+kittens
+cattery
+blinds
+gulf
+lime
+limes
+cucumber
+cucumbers
+melon
+melons

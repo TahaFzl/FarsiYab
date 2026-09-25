@@ -1,0 +1,16 @@
+# Iranian occasions.
+nowruz
+norooz
+nowrouz
+noruz
+nourooz
+yalda
+shab-e yalda
+chaharshanbe suri
+sizdah bedar
+# Persian script
+نوروز
+یلدا
+شب یلدا
+چهارشنبه سوری
+سیزده بدر

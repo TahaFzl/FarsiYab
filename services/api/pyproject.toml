@@ -1,0 +1,54 @@
+[project]
+name = "farsiyab"
+version = "0.1.0"
+description = "FarsiYab backend: finds Iranian and Persian-speaking businesses abroad"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.13",
+    "beautifulsoup4>=4.12",
+    "email-validator>=2",
+    "fastapi>=0.115",
+    "geoalchemy2>=0.15",
+    "httpx>=0.27",
+    "phonenumbers>=8.13",
+    "psycopg[binary]>=3.2",
+    "pyarrow>=17",
+    "pydantic-settings>=2.4",
+    "pyyaml>=6",
+    "rapidfuzz>=3.9",
+    "sqlalchemy>=2.0.30",
+    "typer>=0.12",
+    "uvicorn[standard]>=0.30",
+]
+
+[project.scripts]
+farsiyab = "farsiyab.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["farsiyab"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+# Bilingual label table: one signal per line reads better than wrapped tuples.
+"farsiyab/detection/signals.py" = ["E501"]

@@ -9,6 +9,8 @@
 | signal | توضیح | مثال | وزن اولیه |
 |---|---|---|---|
 | `explicit_keyword` | کلمات صریح در نام، توضیحات یا بیو | Persian, Iranian, Farsi, ایرانی, فارسی, «فارسی صحبت می‌کنیم», "We speak Farsi" | ۰٫۶ |
+| `osm_language_fa` | برچسب زبان در OSM | `language:fa=yes` | ۰٫۷ |
+| `persian_product_term` | «Persian» به‌عنوان صفت محصول | «Persian Bokhara Rug Co»، «Persian Kitten Cattery» | ۰٫۲ |
 | `osm_cuisine_tag` | برچسب OSM | `cuisine=persian`, `cuisine=iranian` | ۰٫۷ |
 | `google_type_persian` | نوع مکان در Google | `persian_restaurant` (در صورت وجود در Places API New) | ۰٫۷ |
 | `overture_persian_category` | دسته در Overture | `taxonomy.primary = persian_restaurant` | ۰٫۷ |
@@ -76,10 +78,25 @@ score = score × (1 − w_neg) برای هر نشانه‌ی منفی
 
 | مورد | مشکل | راه‌حل |
 |---|---|---|
-| «Persian Rugs Canada» و ده‌ها فرش‌فروشی دیگر | «Persian» صفت محصول است، نه نشانه‌ی صاحب کسب‌وکار | عبارت‌های `persian rug`، `persian carpet` و `persian cat` در `negative_keywords` وزن `explicit_keyword` را به ۰٫۲ کاهش می‌دهند؛ این کسب‌وکارها فقط با نشانه‌ی دیگر (متن فارسی در سایت و ...) نمایش داده می‌شوند. البته بسیاری از فرش‌فروشی‌ها ایرانی هستند، پس حذف کامل نمی‌شوند. |
+| «Persian Rugs Canada»، «Persian Bokhara Rug Co» و ده‌ها فرش‌فروشی دیگر | «Persian» صفت محصول است، نه نشانه‌ی صاحب کسب‌وکار | اگر متن یکی از اسم‌های محصول `product_terms.txt` (rug، carpet، cat و ...) را داشته باشد، صفت‌های `product_adjectives.txt` (Persian، persisch، persan) به‌جای `explicit_keyword` نشانه‌ی ضعیف `persian_product_term` (۰٫۲) می‌دهند. Iranian و Farsi و کلمات فارسی تحت تأثیر قرار نمی‌گیرند؛ این کسب‌وکارها فقط با نشانه‌ی دیگر (متن فارسی در سایت و ...) نمایش داده می‌شوند. البته بسیاری از فرش‌فروشی‌ها ایرانی هستند، پس حذف کامل نمی‌شوند. |
 | «Cars With Shirazi» (نمایندگی BMW) | Shirazi نام خانوادگی یک فرد است، نه نام شهر | `iranian_place_name` فقط برای شکل‌های Shiraz، Tehran و ... حساب می‌شود، نه برای شکل صفتی/نام خانوادگی (Shirazi، Tehrani) که به `persian_personal_name` (وزن ۰٫۲) می‌رود |
 | «Kingsway Persian Rugs» با وب‌سایت homestars.com | وب‌سایت ثبت‌شده مال یک دایرکتوری است | فهرست `non_business_domains` |
 | صرافی‌های افغانستانی با نام «صرافی ...» | فارسی (دری) است ولی ایرانی نیست | طبق تعریف بالا نمایش داده می‌شوند؛ اگر نشانه‌ی «Afghan» باشد، برچسب «فارسی‌زبان» می‌گیرند نه «ایرانی» |
+
+### مثبت‌های کاذب لس‌آنجلس (تست دوم، ۲۰۲۶-۰۹)
+
+| مورد | مشکل | راه‌حل |
+|---|---|---|
+| «Michael Bastani, DPM»، «Sohan L Dua»، «Chelo's Beauty Salon» | bastani، sohan و chelo هم غذا هستند و هم اسم شخص | حالت تک‌کلمه‌ای این‌ها از `persian_foods.txt` حذف شد؛ شکل‌های چندکلمه‌ای (chelo kabab، bastani sonnati) باقی ماندند |
+| «Caspian Coast Coffee»، «The Kish Group»، «Kish Mish» | Caspian و Kish کلمه‌ی معمولی یا اسم خانوادگی هستند | به `iranian_places_ambiguous.txt` با وزن ۰٫۱۵ منتقل شدند: به‌تنهایی نمایش داده نمی‌شوند، ولی وب‌سایتشان بررسی می‌شود |
+
+## آستانه‌ها در کد
+| آستانه | مقدار | معنی |
+|---|---|---|
+| `min_display_score` | ۰٫۲۵ | کمتر از این در جست‌وجو نمایش داده نمی‌شود |
+| `min_score_for_website_check` | ۰٫۱۵ | از این به بالا وب‌سایت کسب‌وکار بررسی می‌شود تا نمونه‌های مرزی تأیید یا رد شوند |
+
+هر دو در `services/api/farsiyab/config.py` هستند و با متغیر محیطی قابل تغییرند.
 
 ## ملاحظات
 

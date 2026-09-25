@@ -15,6 +15,7 @@
 #   license            licence of the data we store
 #   storage            full | facts_only | ids_only | none
 #   refresh            how often the adapter runs
+#   monthly_cap        optional request cap enforced by the quota guard (quota_usage table)
 #   status             mvp | planned | candidate | optional | rejected
 #   phase              roadmap phase that implements it (docs/08-roadmap.md)
 #   tested             true only if it was run against real data from this project
@@ -34,7 +35,7 @@ sources:
     refresh: monthly (new release)
     status: mvp
     phase: 1
-    tested: true            # Toronto, releases 2026-08-19.0 and 2026-09-23.1
+    tested: true            # all 10 MVP cities, release 2026-09-23.1 (docs/reports/phase1-first-index.md)
     upstream: [meta, Microsoft, Foursquare, AllThePlaces, PinMeTo, DAC]
     signals: [overture_persian_category, persian_script_name, explicit_keyword, iranian_place_name]
     doc: docs/sources/overture-maps.md
@@ -48,6 +49,7 @@ sources:
     license: ODbL-1.0
     storage: full
     refresh: weekly
+    monthly_cap: 3000       # one query per city index; public server allows ~10k/day
     status: mvp
     phase: 1
     tested: false           # overpass-api.de is blocked by the dev sandbox network policy

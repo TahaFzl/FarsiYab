@@ -12,25 +12,29 @@
 ## چه داده‌ای می‌گیریم
 نام (`name`، `name:fa`، `name:en`)، مختصات، آدرس (`addr:*`)، `cuisine`، `website`، `phone`، `contact:instagram`، `contact:facebook`، `opening_hours`، `description`
 
-## کوئری نمونه
-رستوران‌های تورنتو با نشانه‌ی ایرانی در یک کوئری:
+## کوئری (پیاده‌سازی: `services/api/farsiyab/adapters/osm.py`)
+برای هر شهر **یک** کوئری روی bbox شهر ([`data/cities.yaml`](../../data/cities.yaml)) ارسال می‌شود. این کوئری فقط مکان‌هایی را برمی‌گرداند که از قبل نشانه‌ی ایرانی دارند. به این ترتیب مصرف خیلی کمتر از سقف سرور عمومی می‌ماند (سقف Quota Guard: ۳۰۰۰ کوئری در ماه).
 
 ```overpass
-[out:json][timeout:60];
-area["wikidata"="Q172"]->.city;          // Toronto
+[out:json][timeout:120];
 (
-  nwr(area.city)["amenity"~"restaurant|cafe|fast_food"]["cuisine"~"persian|iranian",i];
-  nwr(area.city)["amenity"~"restaurant|cafe|fast_food"]["name:fa"];
-  nwr(area.city)["amenity"~"restaurant|cafe|fast_food"]["name"~"[پچژگ]"];
-  nwr(area.city)["amenity"~"restaurant|cafe|fast_food"]["name"~"Persian|Iranian|Shiraz|Tehran|Isfahan|Tabriz|Pars|Persepolis",i];
+  nwr["cuisine"~"persian|iranian",i](S,W,N,E);
+  nwr["name:fa"](S,W,N,E);
+  nwr["language:fa"="yes"](S,W,N,E);
+  nwr["name"~"[پچژگ]"](S,W,N,E);
+  nwr["name"~"persian|iranian|farsi|tehran|shiraz|isfahan|esfahan|tabriz|mashhad|persepolis",i](S,W,N,E);
+  nwr["description"~"persian|iranian|farsi",i](S,W,N,E);
 );
 out center tags;
 ```
 
-برای دسته‌هایی مثل پزشک، OSM معمولاً برچسب زبان ندارد. در این دسته‌ها **همه‌ی** مکان‌های آن نوع در شهر گرفته می‌شوند (یک بار در هفته) و Detector روی نام‌ها اجرا می‌شود. این مکان‌ها به‌عنوان کاندید برای تکمیل از سورس‌های دیگر هم استفاده می‌شوند.
+عناصری که هیچ کلید مکان تجاری (`amenity`، `shop`، `office`، `healthcare`، `craft`، `club`، `tourism` یا `leisure`) ندارند، مثل نام خیابان‌ها، کنار گذاشته می‌شوند.
+
+> تغییر نسبت به طرح اولیه: گرفتن «همه‌ی پزشکان شهر» حذف شد. نام پزشکان به‌تنهایی مدرک کافی نیست ([04](../04-iranian-detection.md)) و پزشکانی که برچسب `language:fa=yes` دارند با همین کوئری پیدا می‌شوند.
 
 ## نشانه‌های ایرانی بودن
 - `osm_cuisine_tag`: `cuisine=persian` یا `cuisine=iranian`
+- `osm_language_fa`: `language:fa=yes` (کسب‌وکاری که در OSM ثبت کرده فارسی صحبت می‌کند؛ وزن ۰٫۷)
 - `persian_script_name`: وجود `name:fa` یا حروف فارسی در `name`
 - `iranian_place_name` و `explicit_keyword` در `name` یا `description`
 - لینک‌های `contact:instagram` و `website` برای ادغام با سورس‌های دیگر استفاده می‌شوند

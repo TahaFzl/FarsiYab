@@ -10,7 +10,7 @@ erDiagram
     SOURCE_RECORD ||--o{ EVIDENCE : extracted_from
     SOURCE ||--o{ SOURCE_RECORD : provides
     CITY ||--o{ INDEX_STATUS : tracks
-    CATEGORY ||--o{ INDEX_STATUS : tracks
+    BUSINESS ||--o{ BUSINESS_LINK : has
     BUSINESS ||--o{ REPORT : reported
 ```
 
@@ -95,18 +95,45 @@ erDiagram
 ### `index_status`
 | ستون | نوع | توضیح |
 |---|---|---|
-| city_id, category_slug | PK | |
+| city_id | PK | ایندکس برای کل شهر انجام می‌شود ([02](02-architecture.md#جریان-یک-جستوجو)) |
 | last_indexed_at | timestamptz | |
-| result_count | int | |
-| per_source | jsonb | وضعیت هر سورس: زمان آخرین اجرا، تعداد نتیجه، خطا |
+| per_source | jsonb | وضعیت هر سورس: زمان آخرین اجرا، تعداد نتیجه، خطا، release (برای Overture) |
+| category_counts | jsonb | تعداد نتایج قابل نمایش در هر دسته |
 
-### `search_job`
+### `job`
+صف کار (به‌جای Redis). [02](02-architecture.md#صف-کار-بدون-redis) را ببینید.
+
 | ستون | نوع | توضیح |
 |---|---|---|
 | id | uuid PK | |
-| city_id, categories | | |
+| kind | text | مثلاً `index_city` |
+| payload | jsonb | مثلاً `{"city": "toronto"}` |
+| dedupe_key | text | unique برای job هایی که در وضعیت `queued` یا `running` هستند |
 | status | enum | `queued`, `running`, `done`, `failed` |
-| created_at, finished_at | | |
+| attempts | int | |
+| run_after | timestamptz | برای تلاش دوباره با تأخیر |
+| result, error | jsonb, text | |
+| created_at, started_at, finished_at | timestamptz | |
+
+### `quota_usage`
+| ستون | نوع | توضیح |
+|---|---|---|
+| source_id, period | PK | `period` به شکل `YYYY-MM` |
+| used | int | |
+
+### `business_link`
+لینک‌ها و شناسه‌های نرمال‌شده برای Entity Resolution.
+
+| ستون | نوع | توضیح |
+|---|---|---|
+| business_id | FK | |
+| kind | enum | `website`, `facebook`, `instagram`, `telegram`, `phone` |
+| value | text | نرمال‌شده (مثلاً دامنه‌ی بدون www، نام‌کاربری با حروف کوچک، یا تلفن E.164) |
+| url | text | لینک قابل نمایش |
+| unique(kind, value, business_id) | | |
+
+### `do_not_index`
+کسب‌وکارهایی که درخواست حذف داده‌اند ([07](07-legal-and-privacy.md)). `kind` و `value` مثل `business_link` هستند. هر رکوردی که با این لیست تطبیق داشته باشد ذخیره نمی‌شود.
 
 ### `report`
 | ستون | نوع | توضیح |

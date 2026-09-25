@@ -1,0 +1,32 @@
+# Explicit statements that a business is Iranian / Persian-speaking.
+# Latin entries match whole words; multi-word entries match as phrases.
+persian
+iranian
+farsi
+parsi
+iran
+persisch
+persische
+persischer
+persisches
+iranisch
+iranische
+iranischer
+iranisches
+farsi-speaking
+persan
+persane
+iranien
+iranienne
+we speak farsi
+farsi spoken
+persian speaking
+persian-speaking
+farsi speaking
+# Persian script
+ایرانی
+ایران
+فارسی
+پارسی
+فارسی‌زبان
+فارسی زبان

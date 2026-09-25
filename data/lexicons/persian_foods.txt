@@ -1,0 +1,64 @@
+# Iranian dishes and products, with common transliterations.
+# Single words that are also common names are left out on purpose: bastani,
+# sohan and chelo matched "Michael Bastani, DPM", "Sohan L Dua" and
+# "Chelo's Beauty Salon" in Los Angeles. Their multi-word forms stay.
+koobideh
+kubideh
+koubideh
+koobide
+kabab koobideh
+ghormeh
+ghormeh sabzi
+gormeh sabzi
+fesenjan
+fesenjoon
+tahdig
+tah dig
+barbari
+sangak
+taftoon
+doogh
+dough drink
+joojeh
+jujeh
+joojeh kabab
+chelo kabab
+zereshk polo
+baghali polo
+sabzi polo
+ash reshteh
+aash reshteh
+kashk bademjan
+mirza ghasemi
+sholeh zard
+faloodeh
+paloodeh
+gaz nougat
+noon khamei
+zoolbia
+bamieh
+bastani sonnati
+sohan asali
+# Persian script
+کوبیده
+قرمه سبزی
+قرمه‌سبزی
+فسنجان
+ته‌دیگ
+ته دیگ
+نان بربری
+بربری
+سنگک
+دوغ
+جوجه کباب
+چلوکباب
+چلو کباب
+زرشک پلو
+باقالی پلو
+آش رشته
+کشک بادمجان
+میرزاقاسمی
+شله زرد
+بستنی سنتی
+فالوده
+سوهان

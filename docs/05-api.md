@@ -47,8 +47,9 @@
       "contact": { "phone": "+14165550100", "website": "https://…" },
       "confidence": { "score": 0.86, "label": "high" },
       "sources": [
+        { "id": "overture", "name": "Overture Maps", "url": "https://www.facebook.com/470792293411166", "via": ["meta"] },
         { "id": "osm", "name": "OpenStreetMap", "url": "https://www.openstreetmap.org/node/123" },
-        { "id": "instagram", "name": "Instagram", "url": "https://www.instagram.com/shirazkitchen" }
+        { "id": "instagram", "name": "Instagram", "url": "https://www.instagram.com/shirazkitchen/" }
       ],
       "evidence": [
         {
@@ -56,33 +57,55 @@
           "label": "برچسب غذای ایرانی در OpenStreetMap",
           "snippet": "cuisine=persian",
           "url": "https://www.openstreetmap.org/node/123",
-          "source": "osm"
+          "source": "osm",
+          "weight": 0.7
         }
       ],
+      "links": {
+        "google_maps": "https://www.google.com/maps/search/?api=1&query=Shiraz%20Kitchen%2C%20123%20Yonge%20St",
+        "apple_maps": "https://maps.apple.com/?q=Shiraz%20Kitchen&ll=43.65,-79.38",
+        "openstreetmap": "https://www.openstreetmap.org/?mlat=43.65&mlon=-79.38#map=18/43.65/-79.38"
+      },
       "last_verified_at": "2026-09-20T03:12:00Z"
     }
   ],
   "total": 37,
+  "page": 1,
+  "page_size": 20,
   "live_search": { "job_id": "c9f2…", "status": "running" }
 }
 ```
 
-اگر جست‌وجوی لایو لازم نباشد، `live_search` برابر `null` است.
+اگر شهر تازه ایندکس شده باشد، `live_search` برابر `null` است. در غیر این صورت یک job ایندکس ساخته می‌شود (یا job در حال انجام برگردانده می‌شود).
 
-### `GET /search/jobs/{job_id}/stream` (SSE)
+نکته‌ها:
+- `sources` هم رکوردهای سورس‌ها را شامل می‌شود و هم پروفایل‌های فیس‌بوک، اینستاگرام و تلگرام پیدا‌شده. `via` برای Overture سورس اصلی داده را نشان می‌دهد (مثلاً `meta` یعنی صفحه‌ی فیس‌بوک).
+- اگر رکورد Overture نه صفحه‌ی فیس‌بوک داشته باشد نه وب‌سایت، `url` آن `null` است. Overture برای هر مکان صفحه‌ی عمومی ندارد، و لینک‌های `links` برای بررسی کاربر هستند.
+- نتایج با امتیاز کمتر از ۰٫۲۵ هیچ‌وقت برگردانده نمی‌شوند. جست‌وجو در یک دسته‌ی والد (مثلاً `doctor`) زیردسته‌ها (`doctor/dentist`) را هم شامل می‌شود.
+
+### `GET /search/jobs/{job_id}` ✅ فاز ۱
+وضعیت job ایندکس:
+```json
+{ "id": "c9f2…", "kind": "index_city", "status": "done", "attempts": 1,
+  "result": { "city": "toronto", "sources": { "overture": { "seen": 193872, "stored": 292 } } },
+  "error": null, "created_at": "…", "finished_at": "…" }
+```
+
+### `GET /search/jobs/{job_id}/stream` (SSE) ⏳ فاز ۲
+برای نمایش تدریجی نتایج در فرانت‌اند:
 
 ```
 event: source_started
-data: {"source": "google_places"}
+data: {"source": "overture"}
 
 event: result
 data: { …مثل آیتم‌های results… }
 
 event: source_finished
-data: {"source": "google_places", "count": 12}
+data: {"source": "overture", "count": 12}
 
 event: source_failed
-data: {"source": "brave_search", "reason": "quota_exhausted"}
+data: {"source": "osm", "reason": "Overpass unreachable"}
 
 event: done
 data: {"total_new": 9}
@@ -90,10 +113,11 @@ data: {"total_new": 9}
 
 ## گزارش و ثبت
 
-### `POST /businesses/{id}/reports`
+### `POST /businesses/{id}/reports` ✅ فاز ۱
 ```json
-{ "reason": "not_iranian", "message": "…" }
+{ "reason": "not_iranian", "message": "…", "contact_email": "owner@example.com" }
 ```
+`reason` یکی از `not_iranian`، `closed`، `wrong_info` یا `remove_request` است. بعد از ۳ گزارش `not_iranian`، کسب‌وکار پنهان می‌شود (`status = hidden`) تا ادمین بررسی کند.
 
 ### `POST /submissions` (فاز ۲)
 پیشنهاد کسب‌وکار جدید. تا تأیید ادمین نمایش داده نمی‌شود.

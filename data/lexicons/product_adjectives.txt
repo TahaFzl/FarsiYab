@@ -1,0 +1,9 @@
+# Keywords that can be adjectives describing a product (see product_terms.txt).
+persian
+persisch
+persische
+persischer
+persisches
+persan
+persane
+oriental

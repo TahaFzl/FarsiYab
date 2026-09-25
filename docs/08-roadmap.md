@@ -18,29 +18,33 @@ flowchart LR
 - تصمیم‌های اصلی (ADR-001 تا ADR-005)
 - تست واقعی Overture روی تورنتو ([`research/overture_probe.py`](../research/overture_probe.py))
 
-## فاز ۱: هسته‌ی بک‌اند و سورس‌های MVP
+## فاز ۱: هسته‌ی بک‌اند و سورس‌های MVP ✅
+راهنمای اجرا: [`services/api/README.md`](../services/api/README.md)
+
 **زیرساخت**
-- [ ] ساختار ریپو (`services/api`)، `scripts/setup_db.sh` (Postgres + PostGIS)، راهنمای نصب محلی در README، CI (lint + test)
-- [ ] مدل داده و migration ها (Alembic)
-- [ ] بارگذاری `data/sources.yaml` در جدول `source`، و `data/categories.yaml`
-- [ ] کشورها و شهرهای MVP از GeoNames، و bbox شهرها از Nominatim
+- [x] ساختار ریپو (`services/api`)، `scripts/setup_db.sh` (Postgres + PostGIS)، راهنمای نصب، CI (lint + test) در `.github/workflows/ci.yml`
+- [x] مدل داده و migration ها (Alembic)
+- [x] بارگذاری `data/sources.yaml` در جدول `source`، و `data/categories.yaml`
+- [x] کشورها و ۱۰ شهر MVP از `data/cities.yaml` (GeoNames و Nominatim به فاز ۵ منتقل شدند)
+- [x] صف کار و سهمیه در خود PostgreSQL (بدون Redis)
 
 **سورس‌ها** (رابط `SourceAdapter`)
-- [ ] `overture`: خواندن bbox شهر از آخرین release
-- [ ] `osm`: کوئری Overpass
-- [ ] `website`: بررسی صفحه‌ی اول وب‌سایت کاندیدها (با robots.txt و محدودیت نرخ)
-- [ ] استخراج لینک‌های `facebook` و `instagram` از خروجی سه سورس بالا
+- [x] `overture`: خواندن bbox شهر از آخرین release (**تست‌شده روی داده‌ی واقعی**)
+- [x] `osm`: کوئری Overpass (با تست روی داده‌ی ضبط‌شده؛ شبکه‌ی محیط توسعه به Overpass دسترسی ندارد)
+- [x] `website`: بررسی صفحه‌ی اول وب‌سایت کاندیدها (robots.txt، محدودیت نرخ، تلاش دوباره فقط برای خطاهای شبکه)
+- [x] استخراج لینک‌های `facebook`، `instagram` و `telegram`
 
 **پردازش**
-- [ ] Iranian Detector، واژه‌نامه‌ها در `data/lexicons/` و تست با مثبت‌های کاذب واقعی (فرش‌فروشی‌ها، Shirazi، پشتو و اردو)
-- [ ] Entity Resolver (ادغام تکراری‌های Overture، OSM و وب‌سایت)
-- [ ] ذخیره‌ی `evidence` با snippet و لینک
+- [x] Iranian Detector، واژه‌نامه‌ها در `data/lexicons/` و تست با مثبت‌های کاذب واقعی (فرش‌فروشی‌ها، Shirazi، پشتو، اردو، Bastani، Caspian و ...)
+- [x] Entity Resolver (رکورد یکسان، لینک مشترک، یا فاصله‌ی کمتر از ۱۵۰ متر + نام مشابه)
+- [x] ذخیره‌ی `evidence` با snippet و لینک
 
 **API و ابزار**
-- [ ] `GET /api/v1/search`، `/countries`، `/cities`، `/categories`
-- [ ] CLI: `farsiyab index <city> [--categories …]`
+- [x] `GET /api/v1/search`، `/countries`، `/cities`، `/categories`، `/search/jobs/{id}`، `POST /businesses/{id}/reports`
+- [x] CLI: `farsiyab db init`، `index <city>`، `worker`، `serve`، `cities`
+- [x] ۱۱۱ تست (واحد + دیتابیس واقعی PostGIS)
 
-**معیار اتمام:** دستور `farsiyab index toronto` بدون هیچ کلیدی اجرا شود و `GET /search?city=toronto&categories=restaurant` نتایجی با سورس، لینک مدرک و امتیاز اطمینان برگرداند.
+**معیار اتمام:** دستور `farsiyab index toronto` بدون هیچ کلیدی اجرا شود و `GET /search?city=toronto&categories=restaurant` نتایجی با سورس، لینک مدرک و امتیاز اطمینان برگرداند. ✅ **انجام شد** (نتایج در [reports/phase1-first-index.md](reports/phase1-first-index.md)).
 
 ## فاز ۲: فرانت‌اند MVP
 - [ ] Next.js با i18n (فارسی RTL و انگلیسی) و فونت Vazirmatn

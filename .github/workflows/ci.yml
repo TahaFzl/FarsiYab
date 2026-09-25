@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+
+      # PostgreSQL + PostGIS installed directly on the runner (the project uses no Docker).
+      - name: Install PostgreSQL and PostGIS
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-16 postgresql-16-postgis-3
+          sudo systemctl start postgresql
+      - name: Create test database
+        working-directory: .
+        # Piped in because the postgres user may not be able to read the runner's home.
+        run: sudo -u postgres env DB_NAME=farsiyab_test bash < scripts/setup_db.sh
+
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check .
+      - name: Test
+        run: uv run pytest -q

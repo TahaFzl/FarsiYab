@@ -1,0 +1,7 @@
+# Iranian place names that are also ordinary words, first names or surnames
+# elsewhere ("Caspian Coast Coffee", "The Kish Group", "Kish Mish").
+# They emit `iranian_place_name` with weight 0.15: below the display threshold
+# on their own, but enough to queue the business's website for a check.
+caspian
+khazar
+kish

@@ -14,15 +14,23 @@ from sqlalchemy.orm import Session
 
 from farsiyab import jobs
 from farsiyab.adapters.base import SourceAdapter, SourceUnavailable
+from farsiyab.adapters.government import (
+    CraAdapter,
+    IrsAdapter,
+    LosAngelesAdapter,
+    TorontoAdapter,
+    VancouverAdapter,
+)
 from farsiyab.adapters.osm import OsmAdapter
 from farsiyab.adapters.overture import OvertureAdapter
 from farsiyab.adapters.wikimedia import WikidataAdapter, WikivoyageAdapter
 from farsiyab.config import get_settings
 from farsiyab.db import session_factory, session_scope
+from farsiyab.geocode import Geocoder
 from farsiyab.indexer import index_city
 from farsiyab.loader import load_reference
 from farsiyab.models import City, IndexStatus, Job
-from farsiyab.reference import load_wikivoyage_pages
+from farsiyab.reference import load_regions, load_wikivoyage_pages
 from farsiyab.scheduling import coverage as coverage_rows
 from farsiyab.scheduling import coverage_markdown
 from farsiyab.scheduling import schedule as schedule_jobs
@@ -32,11 +40,24 @@ db_app = typer.Typer(help="Database setup.", no_args_is_help=True)
 app.add_typer(db_app, name="db")
 
 API_DIR = Path(__file__).resolve().parents[1]
-ADAPTERS: dict[str, Callable[[str | None], SourceAdapter]] = {
+AdapterFactory = Callable[[str | None], SourceAdapter]
+
+
+def _geocoder() -> Geocoder:
+    # Its own session: the geocoder commits its cache independently of the indexer.
+    return Geocoder(session_factory()())
+
+
+ADAPTERS: dict[str, AdapterFactory] = {
     "overture": lambda release: OvertureAdapter(release=release),
     "osm": lambda release: OsmAdapter(),
     "wikidata": lambda release: WikidataAdapter(),
     "wikivoyage": lambda release: WikivoyageAdapter(load_wikivoyage_pages()),
+    "gov:la_business": lambda release: LosAngelesAdapter(),
+    "gov:vancouver_business": lambda release: VancouverAdapter(),
+    "gov:toronto_business": lambda release: TorontoAdapter(_geocoder()),
+    "gov:irs_eo_bmf": lambda release: IrsAdapter(load_regions(), _geocoder()),
+    "gov:cra_charities": lambda release: CraAdapter(load_regions(), _geocoder()),
 }
 
 

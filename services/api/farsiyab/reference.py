@@ -47,6 +47,10 @@ def load_wikivoyage_pages(data_dir: Path | None = None) -> dict[str, list[str]]:
     return {c["slug"]: c.get("wikivoyage", []) for c in _load("cities.yaml", data_dir)["cities"]}
 
 
+def load_regions(data_dir: Path | None = None) -> dict[str, list[str]]:
+    return {c["slug"]: c.get("regions", []) for c in _load("cities.yaml", data_dir)["cities"]}
+
+
 def load_sources(data_dir: Path | None = None) -> list[dict[str, Any]]:
     return _load("sources.yaml", data_dir)["sources"]
 

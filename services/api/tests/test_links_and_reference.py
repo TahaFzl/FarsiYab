@@ -1,7 +1,7 @@
 import pytest
 
 from farsiyab.links import classify_url, phone_link, social_link, website_link
-from farsiyab.reference import default_mapper, load_cities, load_sources
+from farsiyab.reference import default_mapper, load_cities, load_regions, load_sources
 
 
 @pytest.mark.parametrize(
@@ -106,3 +106,10 @@ def test_source_registry_is_consistent():
         assert s["status"] in {"mvp", "planned", "candidate", "optional"}
         # ADR-005: nothing before phase 6 may need an account.
         assert not s["account_required"] or s["phase"] == 6, s["id"]
+
+
+def test_regions_are_strings():
+    # Unquoted, YAML reads ON (Ontario) as the boolean true.
+    regions = load_regions()
+    assert regions["toronto"] == ["ON"] and regions["washington-dc"] == ["DC", "MD", "VA"]
+    assert all(isinstance(r, str) for rs in regions.values() for r in rs)

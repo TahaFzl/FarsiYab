@@ -8,3 +8,6 @@ kish
 # Not a place, but just as ambiguous: a surname ("Alex Parsi DDS", Los Angeles)
 # and the Zoroastrian community of India ("Parsi cuisine").
 parsi
+# The country in Latin script: also a given name in Latin America ("IRAN GARCIA MUSIC",
+# LA business licences), so on its own it is only a weak hint.
+iran

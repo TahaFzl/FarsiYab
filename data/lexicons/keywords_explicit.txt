@@ -3,7 +3,6 @@
 persian
 iranian
 farsi
-iran
 persisch
 persische
 persischer
@@ -22,6 +21,18 @@ farsi spoken
 persian speaking
 persian-speaking
 farsi speaking
+# Inflected forms (German declension, French and Spanish plurals / genders)
+iranischen
+iranischem
+persischen
+persischem
+iraniens
+iraniennes
+persans
+persanes
+iraniano
+iraniana
+persa
 # Persian script
 ایرانی
 ایران

@@ -249,6 +249,17 @@ class Report(Base):
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
 
 
+class GeocodeCache(Base):
+    """Nominatim answers, kept so the same address is never asked twice (their policy)."""
+
+    __tablename__ = "geocode_cache"
+
+    query: Mapped[str] = mapped_column(Text, primary_key=True)
+    lat: Mapped[float | None] = mapped_column(Float)
+    lng: Mapped[float | None] = mapped_column(Float)
+    fetched_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
+
+
 class DoNotIndex(Base):
     __tablename__ = "do_not_index"
     __table_args__ = (UniqueConstraint("kind", "value"),)

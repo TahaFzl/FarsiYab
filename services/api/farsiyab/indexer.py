@@ -206,9 +206,10 @@ def store_listing(
     persian, latin = _split_name(listing.name)
     business.name_fa = business.name_fa or persian
     business.name_latin = business.name_latin or latin
-    business.address = business.address or listing.address
-    if business.location is None:
-        business.location = _point(listing.lat, listing.lng)
+    if not listing.private_location:
+        business.address = business.address or listing.address
+        if business.location is None:
+            business.location = _point(listing.lat, listing.lng)
     phone = next((link for link in links if link.kind == "phone"), None)
     site = next((link for link in links if link.kind == "website"), None)
     business.phone_e164 = business.phone_e164 or (phone.value if phone else None)
@@ -222,6 +223,35 @@ def store_listing(
     _add_links(session, business.id, links)
     _add_category(session, business.id, listing.category)
     return True
+
+
+def prune_missing(
+    session: Session, city_id: int, source_id: str, missing: set[str], seen: set[str]
+) -> int:
+    """Remove records the source no longer lists, then businesses left with no source.
+
+    An empty run is not trusted: a source that suddenly returns nothing is more likely
+    broken than emptied, so nothing is removed then.
+    """
+    if not missing or not seen:
+        if missing:
+            log.warning("%s returned nothing; keeping its %d earlier records", source_id,
+                        len(missing))
+        return 0
+    session.execute(
+        delete(SourceRecord).where(
+            SourceRecord.source_id == source_id,
+            SourceRecord.external_id.in_(missing),
+            SourceRecord.business_id.in_(select(Business.id).where(Business.city_id == city_id)),
+        )
+    )
+    session.execute(
+        delete(Business).where(
+            Business.city_id == city_id,
+            ~select(SourceRecord.id).where(SourceRecord.business_id == Business.id).exists(),
+        )
+    )
+    return len(missing)
 
 
 def recompute_scores(session: Session, city_id: int) -> None:
@@ -355,12 +385,15 @@ def index_city(
         try:
             consume(session, adapter.id, source.monthly_cap)
             known = known_external_ids(session, city.id, adapter.id)
+            seen: set[str] = set()
             for listing in adapter.fetch(info):
                 stats["seen"] += 1
+                seen.add(listing.external_id)
                 if store_listing(session, city, listing, known):
                     stats["stored"] += 1
                     if stats["stored"] % COMMIT_EVERY == 0:
                         session.commit()
+            stats["removed"] = prune_missing(session, city.id, adapter.id, known - seen, seen)
             session.commit()
         except (SourceUnavailable, QuotaExhausted) as exc:
             session.rollback()

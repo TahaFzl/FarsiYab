@@ -69,6 +69,29 @@ def load_lexicons(directory: Path) -> Lexicons:
     )
 
 
+HINT_FILES = (
+    "keywords_explicit.txt",
+    "iranian_places.txt",
+    "iranian_places_ambiguous.txt",
+    "persian_foods.txt",
+    "occasions.txt",
+)
+
+
+@lru_cache
+def latin_hint_terms(directory: Path | None = None) -> tuple[str, ...]:
+    """Latin-script lexicon terms (4+ letters) used to pre-filter large registries on the
+    server side; the detector then decides precisely. Surnames are left out on purpose."""
+    directory = directory or get_settings().data_dir / "lexicons"
+    terms = {
+        term
+        for name in HINT_FILES
+        for term in read_terms(directory / name)
+        if re.fullmatch(r"[a-z][a-z \-]{3,}", term)
+    }
+    return tuple(sorted(terms))
+
+
 @lru_cache
 def default_lexicons() -> Lexicons:
     return load_lexicons(get_settings().data_dir / "lexicons")

@@ -176,6 +176,24 @@ class TestIndexCity:
         status = db.get(IndexStatus, business.city_id)
         assert status.category_counts == {"restaurant": 1}
 
+    def test_records_the_source_dropped_are_removed(self, db):
+        first = [listing(external_id="a", name="Tehran Market"),
+                 listing(external_id="b", name="Shiraz Grill", lat=43.8)]
+        index_city(db, "toronto", [FakeAdapter("overture", first)], check_sites=False,
+                   settings=SETTINGS)
+        assert db.scalar(select(func.count(Business.id))) == 2
+
+        report = index_city(db, "toronto", [FakeAdapter("overture", first[:1])],
+                            check_sites=False, settings=SETTINGS)
+        assert report["sources"]["overture"]["removed"] == 1
+        assert [b.name_latin for b in db.scalars(select(Business))] == ["Tehran Market"]
+
+        # A source that suddenly returns nothing is not trusted.
+        report = index_city(db, "toronto", [FakeAdapter("overture", [])], check_sites=False,
+                            settings=SETTINGS)
+        assert report["sources"]["overture"]["removed"] == 0
+        assert db.scalar(select(func.count(Business.id))) == 1
+
     def test_network_errors_leave_website_unchecked(self, db):
         adapters = [FakeAdapter("overture", [listing(urls=["https://shiraz.example/"])])]
         checker = FakeChecker({"https://shiraz.example/": WebsiteResult(

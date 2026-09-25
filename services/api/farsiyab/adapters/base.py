@@ -30,6 +30,9 @@ class RawListing:
     texts: list[TextField] = field(default_factory=list)
     signals: list[Signal] = field(default_factory=list)  # structured, source-specific
     raw: dict[str, Any] | None = None
+    # Government registries often list a home address; such coordinates are used to
+    # match other sources but never stored or shown (docs/07-legal-and-privacy.md).
+    private_location: bool = False
 
 
 class SourceAdapter(Protocol):

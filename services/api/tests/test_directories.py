@@ -8,8 +8,10 @@ from farsiyab.adapters.directories import (
     DirectoryEntry,
     IranianBusinessCenter,
     category_for,
+    shared_links,
 )
 from farsiyab.detection.detector import detect, score
+from farsiyab.links import classify_url
 from tests.test_adapters import TORONTO
 
 # Shaped like the live pages (2026-09-25).
@@ -92,3 +94,22 @@ def test_entries_outside_the_city_are_skipped(tmp_path):
     adapter.entries = lambda: [DirectoryEntry(url="u", name="New Jersey Realtor",
                                               lat=39.95, lng=-74.97)]
     assert list(adapter.fetch(TORONTO)) == []
+
+
+def test_links_shared_by_many_entries_are_dropped():
+    # Live Bazaarche crawl: WhatsApp buttons and a bank's mortgage site linked dozens of
+    # unrelated businesses, and entity resolution merged them all into one.
+    entries = [
+        DirectoryEntry(url=f"https://bazaarche.ca/listing/{i}/", name=f"Business {i}",
+                       links=["https://mortgage.bigbank.example/agent" + str(i % 1),
+                              f"https://own{i}.example/"])
+        for i in range(4)
+    ]
+    shared = shared_links(entries)
+    assert "https://mortgage.bigbank.example/agent0" in shared
+    assert not any(u.startswith("https://own") for u in shared)
+
+
+def test_whatsapp_is_not_a_business_website():
+    assert classify_url("https://wa.me/14167096969") is None
+    assert classify_url("https://api.whatsapp.com/send?phone=1416") is None

@@ -52,7 +52,7 @@ sources:
     monthly_cap: 3000       # one query per city index; public server allows ~10k/day
     status: mvp
     phase: 1
-    tested: false           # overpass-api.de is blocked by the dev sandbox network policy
+    tested: true
     signals: [osm_cuisine_tag, persian_script_name, explicit_keyword, iranian_place_name]
     doc: docs/sources/openstreetmap.md
 
@@ -67,7 +67,7 @@ sources:
     refresh: monthly per site
     status: mvp
     phase: 1
-    tested: false
+    tested: true
     signals: [website_persian_content, explicit_keyword, iranian_food_terms, nowruz_yalda_mentions]
     doc: docs/sources/business-websites.md
 
@@ -186,7 +186,7 @@ sources:
     refresh: monthly
     status: mvp
     phase: 3
-    tested: false           # adapter + recorded responses only; sandbox network blocks Wikimedia
+    tested: true
     signals: [wikidata_iran_related, persian_script_name]
     doc: docs/sources/wikimedia.md
 
@@ -201,7 +201,7 @@ sources:
     refresh: monthly
     status: mvp
     phase: 3
-    tested: false           # adapter + recorded responses only; sandbox network blocks Wikimedia
+    tested: true
     signals: [explicit_keyword, iranian_food_terms]
     doc: docs/sources/wikimedia.md
 
@@ -214,9 +214,9 @@ sources:
     license: City of LA open data terms
     storage: facts_only
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [persian_script_name, explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
@@ -229,9 +229,9 @@ sources:
     license: Open Government Licence – Toronto
     storage: facts_only
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [persian_script_name, explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
@@ -244,9 +244,9 @@ sources:
     license: Open Government Licence – Vancouver
     storage: facts_only
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [persian_script_name, explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
@@ -259,9 +259,9 @@ sources:
     license: US public domain
     storage: facts_only
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
@@ -274,9 +274,9 @@ sources:
     license: Open Government Licence – Canada
     storage: facts_only
     refresh: yearly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
@@ -330,15 +330,15 @@ sources:
   - id: registry:*
     name_fa: رجیسترهای رسمی (پزشک، وکیل، مترجم)
     name_en: Professional registries
-    kind: evidence
-    access: public_pages
+    kind: link_only  # reviewed 2026-09: every registry is linked, none is read (data/registry_links.yaml)
+    access: link_only
     account_required: false
     license: per registry
-    storage: facts_only
-    refresh: monthly
-    status: candidate
+    storage: none
+    refresh: manual
+    status: mvp
     phase: 3
-    tested: false
+    tested: true
     signals: [registry_language_farsi]
     doc: docs/sources/professional-registries.md
 
@@ -434,7 +434,7 @@ sources:
     license: ODbL-1.0
     status: mvp
     phase: 1
-    tested: false
+    tested: true
     doc: docs/06-categories-and-locations.md
 
 # Rejected sources and the reasons are listed in docs/sources/rejected.md.

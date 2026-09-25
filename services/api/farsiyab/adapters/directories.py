@@ -181,6 +181,19 @@ def category_for(entry: DirectoryEntry) -> str:
     return next((slug for needle, slug in DIRECTORY_CATEGORY if needle in text), "other")
 
 
+def shared_links(entries: list[DirectoryEntry], limit: int = 2) -> set[str]:
+    """Links on more than `limit` entries: a site template link or a big company's host
+    (mortgage.rbc.com) that would otherwise merge unrelated businesses."""
+    counts: dict[str, int] = {}
+    for entry in entries:
+        for value in {link.value for u in entry.links if (link := classify_url(u))}:
+            counts[value] = counts.get(value, 0) + 1
+    return {
+        u for entry in entries for u in entry.links
+        if (link := classify_url(u)) and counts[link.value] > limit
+    }
+
+
 class DirectoryAdapter:
     """Crawls one directory (cached for a week) and yields its entries in the city box."""
 
@@ -252,7 +265,9 @@ class DirectoryAdapter:
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
         west, south, east, north = city.bbox
-        for entry in self.entries():
+        entries = self.entries()
+        shared = shared_links(entries)
+        for entry in entries:
             if entry.lat is None or entry.lng is None:
                 continue
             if not (south <= entry.lat <= north and west <= entry.lng <= east):
@@ -266,7 +281,7 @@ class DirectoryAdapter:
                 lng=entry.lng,
                 category=category_for(entry),
                 phones=[entry.phone] if entry.phone else [],
-                urls=entry.links,
+                urls=[u for u in entry.links if u not in shared],
                 texts=[TextField("name", entry.name, entry.url),
                        TextField("text", entry.description, entry.url)],
                 # The business chose to list itself in an Iranian directory.

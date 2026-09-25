@@ -64,3 +64,13 @@ lawyers.com
 realtor.com
 zillow.com
 sites.google.com
+# Messaging, scheduling and short links (Bazaarche test: every business with a
+# WhatsApp button ended up merged through the bare "wa.me" host).
+wa.me
+whatsapp.com
+wa.link
+bit.ly
+tinyurl.com
+calendly.com
+bazaarche.ca
+iranianbusinesscenter.com

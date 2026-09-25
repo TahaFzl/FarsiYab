@@ -62,14 +62,14 @@ flowchart LR
 **معیار اتمام:** یک کاربر واقعی از موبایل، تورنتو و رستوران را انتخاب کند و نتایج را با مدرک و لینک ببیند. ✅ در تست‌های end-to-end (نمای موبایل Pixel 7) انجام شد. فقط استقرار روی سرور واقعی باقی مانده است.
 
 ## فاز ۳: سورس‌های بیشتر (بدون حساب)
-- [ ] بررسی ToS و `robots.txt` **۱۹ دایرکتوری ایرانی** و ارسال ایمیل پیشنهاد همکاری
-- [ ] آداپتر دایرکتوری‌های تأییدشده
-- [ ] بررسی رجیسترها (CPSO، CalBar، Texas Bar، BDÜ و ...) و انتخاب حالت «داده» یا «لینک»
-- [ ] `gov:*`: مجوزهای LA، تورنتو و ونکوور؛ IRS و CRA برای دسته‌ی `community`
-- [ ] `common_crawl`: کشف ماهانه‌ی سایت‌های فارسی‌زبان
-- [ ] `wdc_schemaorg`: رستوران‌های با `servesCuisine = Persian`
-- [x] `wikidata` و `wikivoyage`: کد و تست با داده‌ی ضبط‌شده ✅؛ **اجرا روی داده‌ی واقعی باقی مانده** (شبکه‌ی محیط توسعه بسته است)
-- [ ] دسته‌های جدید: `accounting`، `education`، `community`، `translator`
+- [x] بررسی ToS و `robots.txt` **۱۹ دایرکتوری ایرانی** ✅ ([نتیجه](sources/community-directories.md))؛ ایمیل پیشنهاد همکاری باید توسط صاحب پروژه فرستاده شود
+- [x] آداپتر دایرکتوری‌های تأییدشده: `directory:bazaarche` و `directory:iranianbusinesscenter`
+- [x] بررسی رجیسترها: همه «لینک» هستند و در صفحه‌ی نتایج نمایش داده می‌شوند ([نتیجه](sources/professional-registries.md))
+- [x] `gov:*`: مجوزهای LA، تورنتو و ونکوور؛ IRS و CRA برای دسته‌ی `community` (با geocoding و قاعده‌ی حریم خصوصی `private_location`)
+- [x] `common_crawl`: ارزیابی شد و ⏸️ به تعویق افتاد ([دلیل](sources/common-crawl.md))
+- [x] `wdc_schemaorg`: روی داده‌ی واقعی آزمایش شد و ❌ فعلاً رد شد (۵ نتیجه از ۳۱۲ هزار رستوران)
+- [x] `wikidata` و `wikivoyage`: اجراشده روی داده‌ی واقعی (HTTP/2 و رعایت `Retry-After`)
+- [x] دسته‌های جدید: `accounting`، `education`، `community`، `translator`
 - [x] Scheduler: `farsiyab schedule` روزانه با systemd timer؛ شهرهای ایندکس‌نشده، قدیمی‌تر از ۷ روز، یا ایندکس‌شده با release قدیمی Overture را در صف می‌گذارد
 - [x] گزارش پوشش: `farsiyab coverage --markdown` (معیار اتمام این فاز)
 

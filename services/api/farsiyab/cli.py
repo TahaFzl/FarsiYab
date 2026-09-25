@@ -2,6 +2,7 @@
 
 import json
 import logging
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
@@ -15,11 +16,13 @@ from farsiyab import jobs
 from farsiyab.adapters.base import SourceAdapter, SourceUnavailable
 from farsiyab.adapters.osm import OsmAdapter
 from farsiyab.adapters.overture import OvertureAdapter
+from farsiyab.adapters.wikimedia import WikidataAdapter, WikivoyageAdapter
 from farsiyab.config import get_settings
 from farsiyab.db import session_factory, session_scope
 from farsiyab.indexer import index_city
 from farsiyab.loader import load_reference
 from farsiyab.models import City, IndexStatus, Job
+from farsiyab.reference import load_wikivoyage_pages
 from farsiyab.scheduling import coverage as coverage_rows
 from farsiyab.scheduling import coverage_markdown
 from farsiyab.scheduling import schedule as schedule_jobs
@@ -29,7 +32,12 @@ db_app = typer.Typer(help="Database setup.", no_args_is_help=True)
 app.add_typer(db_app, name="db")
 
 API_DIR = Path(__file__).resolve().parents[1]
-ADAPTERS = {"overture": OvertureAdapter, "osm": OsmAdapter}
+ADAPTERS: dict[str, Callable[[str | None], SourceAdapter]] = {
+    "overture": lambda release: OvertureAdapter(release=release),
+    "osm": lambda release: OsmAdapter(),
+    "wikidata": lambda release: WikidataAdapter(),
+    "wikivoyage": lambda release: WikivoyageAdapter(load_wikivoyage_pages()),
+}
 
 
 def _alembic_config() -> Config:
@@ -75,7 +83,7 @@ def build_adapters(sources: list[str], release: str | None) -> list[SourceAdapte
     for source in sources:
         if source not in ADAPTERS:
             raise typer.BadParameter(f"unknown source {source!r}; choose from {list(ADAPTERS)}")
-        adapters.append(OvertureAdapter(release=release) if source == "overture" else OsmAdapter())
+        adapters.append(ADAPTERS[source](release))
     return adapters
 
 

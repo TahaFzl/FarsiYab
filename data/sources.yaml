@@ -184,9 +184,9 @@ sources:
     license: CC0-1.0
     storage: full
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: false           # adapter + recorded responses only; sandbox network blocks Wikimedia
     signals: [wikidata_iran_related, persian_script_name]
     doc: docs/sources/wikimedia.md
 
@@ -199,9 +199,9 @@ sources:
     license: CC-BY-SA-4.0
     storage: facts_only
     refresh: monthly
-    status: planned
+    status: mvp
     phase: 3
-    tested: false
+    tested: false           # adapter + recorded responses only; sandbox network blocks Wikimedia
     signals: [explicit_keyword, iranian_food_terms]
     doc: docs/sources/wikimedia.md
 

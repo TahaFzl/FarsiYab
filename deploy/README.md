@@ -61,6 +61,7 @@ sudo -u farsiyab bash -c 'set -a; . /etc/farsiyab/farsiyab.env; npm run build'
 sudo cp /opt/farsiyab/deploy/systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now farsiyab-api farsiyab-worker farsiyab-web
+sudo systemctl enable --now farsiyab-schedule.timer   # هر شب شهرهای قدیمی را در صف می‌گذارد
 
 sudo cp /opt/farsiyab/deploy/Caddyfile /etc/caddy/Caddyfile
 sudo nano /etc/caddy/Caddyfile            # farsiyab.example.com را با دامنه‌ی خودتان عوض کنید

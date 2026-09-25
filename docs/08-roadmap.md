@@ -68,9 +68,10 @@ flowchart LR
 - [ ] `gov:*`: مجوزهای LA، تورنتو و ونکوور؛ IRS و CRA برای دسته‌ی `community`
 - [ ] `common_crawl`: کشف ماهانه‌ی سایت‌های فارسی‌زبان
 - [ ] `wdc_schemaorg`: رستوران‌های با `servesCuisine = Persian`
-- [ ] `wikidata` و `wikivoyage`
+- [x] `wikidata` و `wikivoyage`: کد و تست با داده‌ی ضبط‌شده ✅؛ **اجرا روی داده‌ی واقعی باقی مانده** (شبکه‌ی محیط توسعه بسته است)
 - [ ] دسته‌های جدید: `accounting`، `education`، `community`، `translator`
-- [ ] Scheduler: Overture ماهانه، OSM و وب‌سایت‌ها هفتگی، دایرکتوری‌ها هفتگی
+- [x] Scheduler: `farsiyab schedule` روزانه با systemd timer؛ شهرهای ایندکس‌نشده، قدیمی‌تر از ۷ روز، یا ایندکس‌شده با release قدیمی Overture را در صف می‌گذارد
+- [x] گزارش پوشش: `farsiyab coverage --markdown` (معیار اتمام این فاز)
 
 **معیار اتمام:** برای هر شهر MVP، حداقل ۳ سورس مستقل نتیجه بدهند. گزارش مقایسه‌ی پوشش هر سورس در `docs/reports/` ثبت شود.
 

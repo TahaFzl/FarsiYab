@@ -1,9 +1,12 @@
 """Load the word lists in data/lexicons/ and compile them into regexes."""
 
+import dataclasses
 import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+
+import yaml
 
 from farsiyab.config import get_settings
 
@@ -103,3 +106,23 @@ def latin_hint_terms(directory: Path | None = None) -> tuple[str, ...]:
 @lru_cache
 def default_lexicons() -> Lexicons:
     return load_lexicons(get_settings().data_dir / "lexicons")
+
+
+@lru_cache
+def country_exclusions(directory: Path | None = None) -> dict[str, frozenset[str]]:
+    path = (directory or get_settings().data_dir / "lexicons") / "country_exclusions.yaml"
+    if not path.exists():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {str(k).upper(): frozenset(_normalize_term(t) for t in v or ()) for k, v in data.items()}
+
+
+@lru_cache
+def lexicons_for_country(lex: Lexicons, country: str) -> Lexicons:
+    """`lex` without the explicit keywords excluded for this country."""
+    excluded = country_exclusions().get(country.upper())
+    if not excluded:
+        return lex
+    directory = get_settings().data_dir / "lexicons"
+    terms = [t for t in read_terms(directory / "keywords_explicit.txt") if t not in excluded]
+    return dataclasses.replace(lex, explicit=compile_terms(terms))

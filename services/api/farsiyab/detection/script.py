@@ -23,6 +23,9 @@ ARABIC_ONLY = {"ي", "ك", "ة", "ى"}  # ي ك ة ى
 PASHTO_ONLY = set("ټډړږښګڼېۍځڅ")
 URDU_ONLY = set("ٹڈڑںےھۓہۂۃ")  # ہ (heh goal) is Urdu; Persian uses ه
 SORANI_ONLY = set("ڵڕۆێەڤ")
+# The Pashto possessive "د" as a word of its own ("د عبدالرحمن خان ..."); Persian never
+# writes a lone dal.
+PASHTO_PARTICLE = re.compile(r"(?<![\w\u0600-\u06FF])د(?![\w\u0600-\u06FF])")
 
 SHORT_TEXT_CHARS = 15
 
@@ -45,6 +48,8 @@ def classify(text: str) -> Script:
     if not letters:
         return Script.NONE
     if letters & (PASHTO_ONLY | URDU_ONLY | SORANI_ONLY):
+        return Script.OTHER
+    if PASHTO_PARTICLE.search(text):
         return Script.OTHER
     if letters & PERSIAN_DEFINITIVE:
         return Script.PERSIAN_DEFINITIVE

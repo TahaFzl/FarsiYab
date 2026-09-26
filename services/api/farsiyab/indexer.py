@@ -178,7 +178,7 @@ def store_listing(
     `known` holds the external ids this source already has in the city; passing
     it avoids a database round trip for each of the (many) non-Iranian places.
     """
-    signals = detect(listing.texts, listing.signals)
+    signals = detect(listing.texts, listing.signals, country=city.country_code)
     if not has_positive(signals):
         if known is not None and listing.external_id not in known:
             return False

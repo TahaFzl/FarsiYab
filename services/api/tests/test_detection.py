@@ -149,3 +149,19 @@ def test_turkish_capital_i_keeps_snippet_offsets():
     signal = next(s for s in detect([TextField("text", "Kadıköy'de İranlı aile restoranı", None)])
                   if s.signal == "explicit_keyword")
     assert "İranlı" in signal.snippet
+
+
+def test_persan_is_not_evidence_in_turkey():
+    # "Persan Unlu Mamulleri" is a Turkish bakery brand (phase 5 spot check).
+    name = [TextField("name", "Persan Unlu Mamuller", None)]
+    assert "explicit_keyword" in [s.signal for s in detect(name)]
+    assert "explicit_keyword" in [s.signal for s in detect(name, country="FR")]
+    assert "explicit_keyword" not in [s.signal for s in detect(name, country="TR")]
+    # Other keywords still count in Turkey.
+    iranli = detect([TextField("name", "İranlı Restoran", None)], country="TR")
+    assert "explicit_keyword" in [s.signal for s in iranli]
+
+
+def test_pashto_possessive_particle():
+    assert script.classify("د عبدالرحمن خان هوایی سفرونه") == script.Script.OTHER
+    assert script.classify("کباب دربند") != script.Script.OTHER  # د inside a word

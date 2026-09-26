@@ -1,0 +1,10 @@
+# Explicit keywords that mean something else in a country, so they are not evidence
+# there. Checked against live results (phase 5 spot check, 2026-09-26).
+#
+# TR: "Persan" is a Turkish bakery brand ("Persan Unlu Mamulleri"), not the French
+#     word for Persian.
+TR:
+  - persan
+  - persane
+  - persans
+  - persanes

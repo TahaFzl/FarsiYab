@@ -11,7 +11,12 @@ from math import prod
 from typing import Literal
 
 from farsiyab.detection import script
-from farsiyab.detection.lexicon import Lexicons, default_lexicons, normalize_text
+from farsiyab.detection.lexicon import (
+    Lexicons,
+    default_lexicons,
+    lexicons_for_country,
+    normalize_text,
+)
 from farsiyab.detection.signals import WEIGHTS, Signal, make
 
 # page_head: a web page's title and meta description; page: the rest of its text.
@@ -102,9 +107,13 @@ def detect(
     fields: Iterable[TextField],
     extra: Iterable[Signal] = (),
     lexicons: Lexicons | None = None,
+    country: str | None = None,
 ) -> list[Signal]:
-    """All signals for one source record, strongest first, one per signal type."""
+    """All signals for one source record, strongest first, one per signal type.
+    `country` drops keywords that mean something else there (country_exclusions.yaml)."""
     lex = lexicons or default_lexicons()
+    if country:
+        lex = lexicons_for_country(lex, country)
     candidates: list[Signal] = list(extra)
     for field in fields:
         if not field.text or not field.text.strip():

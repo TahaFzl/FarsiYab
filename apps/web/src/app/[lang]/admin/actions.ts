@@ -88,8 +88,8 @@ export async function grantClaim(_state: GrantState, form: FormData): Promise<Gr
       `/claims/${id}/verify`,
       { method: "POST" },
     );
-    refresh(lang);
-    // The admin sends this link to the owner; the key is never stored in clear.
+    // No refresh here: the claim would leave the pending list and take the link, which is
+    // shown only once, with it. The admin sends this link to the owner.
     return { link: `${siteUrl()}/${lang}/owner/${id}#key=${owner_key}`, email: contact_email, error: false };
   } catch (error) {
     unstable_rethrow(error); // let the redirect to the login page through

@@ -342,11 +342,12 @@ class NonprofitAdapter:
 
     def __init__(
         self,
-        regions: dict[str, list[str]],
+        regions: dict[str, list[str]] | None = None,
         geocoder: Geocoder | None = None,
         client: httpx.Client | None = None,
     ):
-        self.regions = regions  # city slug -> states / provinces
+        # city slug -> states / provinces; by default the city's own `regions`.
+        self.regions = regions or {}
         self.geocoder = geocoder
         self.client = _client(client)
         self._rows: dict[str, list[dict[str, str]]] = {}
@@ -361,7 +362,7 @@ class NonprofitAdapter:
         raise NotImplementedError
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
-        regions = self.regions.get(city.slug, [])
+        regions = self.regions.get(city.slug) or list(city.regions)
         if not regions or city.country != self.country:
             return
         if self.geocoder is None:
@@ -604,9 +605,10 @@ class SireneAdapter:
 
     id = "gov:fr_sirene"
 
-    def __init__(self, departments: dict[str, list[str]], client: httpx.Client | None = None,
-                 delay: float = 0.25, max_pages: int = 20):
-        self.departments = departments  # city slug -> départements ("75", "92", ...)
+    def __init__(self, departments: dict[str, list[str]] | None = None,
+                 client: httpx.Client | None = None, delay: float = 0.25, max_pages: int = 20):
+        # city slug -> départements ("75", "92", ...); by default the city's `regions`.
+        self.departments = departments or {}
         self.client = _client(client)
         self.delay = delay
         self.max_pages = max_pages
@@ -622,7 +624,7 @@ class SireneAdapter:
                 break
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
-        departments = self.departments.get(city.slug, [])
+        departments = self.departments.get(city.slug) or list(city.regions)
         if not departments or city.country != "FR":
             return
         terms = tuple(dict.fromkeys((*latin_hint_terms(), *SIRENE_EXTRA_TERMS)))

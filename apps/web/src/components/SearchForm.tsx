@@ -1,18 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
-import { useCities } from "@/hooks/useCities";
-import { searchHref, type CategoryOption, type CityOption, type Country } from "@/lib/api";
+import { CityPicker, type KnownCity, type PickedCity } from "@/components/CityPicker";
+import { searchHref, type CategoryOption } from "@/lib/api";
 import type { Locale } from "@/lib/i18n";
 
 export interface SearchFormText {
-  country: string;
   city: string;
-  chooseCountry: string;
-  chooseCity: string;
-  loadingCities: string;
+  cityPlaceholder: string;
+  searchingCities: string;
+  noCity: string;
+  cityFailed: string;
+  addingCity: string;
   categories: string;
   categoriesHint: string;
   search: string;
@@ -23,26 +24,21 @@ export interface SearchFormText {
 interface Props {
   lang: Locale;
   text: SearchFormText;
-  countries: Country[];
+  known: KnownCity[];
+  countryNames: Record<string, string>;
   categories: CategoryOption[];
-  initial?: { country: string; city: string; categories: string[]; cities: CityOption[] };
+  initial?: { country: string; city: string; name: string; categories: string[] };
   compact?: boolean;
 }
 
-export function SearchForm({ lang, text, countries, categories, initial, compact }: Props) {
+export function SearchForm({ lang, text, known, countryNames, categories, initial, compact }: Props) {
   const router = useRouter();
-  const [country, setCountry] = useState(initial?.country ?? "");
-  const [city, setCity] = useState(initial?.city ?? "");
-  const { cities, loading: loadingCities } = useCities(
-    country,
-    lang,
-    initial?.cities,
-    useCallback((data: CityOption[]) => {
-      if (data.length === 1) setCity(data[0].slug);
-    }, []),
+  const [picked, setPicked] = useState<PickedCity | null>(
+    initial ? { country: initial.country, city: initial.city, name: initial.name } : null,
   );
   const [selected, setSelected] = useState<string[]>(initial?.categories ?? []);
   const [error, setError] = useState("");
+  const [preparing, setPreparing] = useState(false);
 
   function toggle(slug: string) {
     setSelected((current) =>
@@ -53,59 +49,35 @@ export function SearchForm({ lang, text, countries, categories, initial, compact
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!country || !city) return setError(text.needCity);
+    if (!picked) return setError(text.needCity);
     if (selected.length === 0) return setError(text.needCategory);
-    router.push(searchHref(lang, { country, city, categories: selected }));
+    router.push(searchHref(lang, { country: picked.country, city: picked.city, categories: selected }));
   }
-
-  const selectClass =
-    "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60";
 
   return (
     <form
       onSubmit={submit}
       className={`space-y-5 rounded-2xl border border-border bg-surface shadow-sm ${compact ? "p-4" : "p-5 sm:p-7"}`}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">{text.country}</span>
-          <select
-            className={selectClass}
-            value={country}
-            onChange={(e) => {
-              setCountry(e.target.value);
-              setCity("");
-              setError("");
-            }}
-          >
-            <option value="">{text.chooseCountry}</option>
-            {countries.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium">{text.city}</span>
-          <select
-            className={selectClass}
-            value={city}
-            disabled={!country || loadingCities}
-            onChange={(e) => {
-              setCity(e.target.value);
-              setError("");
-            }}
-          >
-            <option value="">{loadingCities ? text.loadingCities : text.chooseCity}</option>
-            {cities.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <CityPicker
+        lang={lang}
+        text={{
+          city: text.city,
+          cityPlaceholder: text.cityPlaceholder,
+          searching: text.searchingCities,
+          noMatch: text.noCity,
+          failed: text.cityFailed,
+          adding: text.addingCity,
+        }}
+        known={known}
+        countryNames={countryNames}
+        value={picked}
+        onChange={(city) => {
+          setPicked(city);
+          setError("");
+        }}
+        onBusy={setPreparing}
+      />
 
       <fieldset className="space-y-2.5">
         <legend className="text-sm font-medium">
@@ -136,7 +108,8 @@ export function SearchForm({ lang, text, countries, categories, initial, compact
       <div className="flex flex-wrap items-center gap-4">
         <button
           type="submit"
-          className="rounded-lg bg-primary px-8 py-2.5 font-semibold text-white hover:bg-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/40"
+          disabled={preparing}
+          className="rounded-lg bg-primary px-8 py-2.5 font-semibold text-white hover:bg-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
         >
           {text.search}
         </button>

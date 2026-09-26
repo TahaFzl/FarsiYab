@@ -23,6 +23,8 @@ class CityInfo:
     name_en: str
     center: tuple[float, float]  # lon, lat
     bbox: tuple[float, float, float, float]  # west, south, east, north
+    regions: tuple[str, ...] = ()  # states/provinces whose registries are read
+    wikivoyage: tuple[str, ...] = ()  # English Wikivoyage page titles
 
 
 def load_countries(data_dir: Path | None = None) -> list[dict[str, Any]]:

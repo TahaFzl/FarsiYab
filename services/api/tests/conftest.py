@@ -54,6 +54,9 @@ def engine() -> Iterator[Engine]:
 def db(engine: Engine) -> Iterator[Session]:
     with engine.begin() as conn:
         conn.execute(text(f"TRUNCATE {', '.join(MUTABLE_TABLES)} CASCADE"))
+        # Cities visitors added (tests/test_places.py) and countries they brought.
+        conn.execute(text("DELETE FROM city WHERE added_by = 'visitor'"))
+        conn.execute(text("DELETE FROM country WHERE code NOT IN (SELECT country_code FROM city)"))
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     with factory() as session:
         yield session

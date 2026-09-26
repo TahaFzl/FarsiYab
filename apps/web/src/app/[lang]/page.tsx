@@ -35,7 +35,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <SearchForm
         lang={lang}
         text={dict.form}
-        countries={countries}
+        known={cities}
+        countryNames={Object.fromEntries(countries.map((c) => [c.code, c.name]))}
         categories={flattenCategories(categories)}
       />
       <section className="space-y-3">

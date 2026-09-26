@@ -9,9 +9,8 @@ test("a submission reaches the admin review queue", async ({ page }) => {
   const name = `E2E Test Kabab ${Date.now()}`;
 
   await page.goto("/fa/submit");
-  await page.getByLabel("کشور").selectOption("CA");
-  await expect(page.getByLabel("شهر")).toBeEnabled();
-  await page.getByLabel("شهر").selectOption("toronto");
+  await page.getByRole("combobox", { name: "شهر" }).fill("تورن");
+  await page.getByRole("option", { name: /تورنتو/ }).click();
   await page.getByLabel("نام کسب‌وکار").fill(name);
   await page.locator('select[name="category"]').selectOption("restaurant");
   await page.getByLabel("لینک‌های عمومی 1").fill("https://e2e-kabab.example/");

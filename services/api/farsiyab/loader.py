@@ -7,7 +7,14 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from farsiyab.models import Category, City, Country, Source
-from farsiyab.reference import load_categories, load_cities, load_countries, load_sources
+from farsiyab.reference import (
+    load_categories,
+    load_cities,
+    load_countries,
+    load_regions,
+    load_sources,
+    load_wikivoyage_pages,
+)
 
 
 def _upsert(
@@ -39,6 +46,8 @@ def load_reference(session: Session, data_dir: Path | None = None) -> dict[str, 
     )
 
     cities = load_cities(data_dir)
+    regions = load_regions(data_dir)
+    wikivoyage = load_wikivoyage_pages(data_dir)
     _upsert(
         session, City,
         [
@@ -52,6 +61,8 @@ def load_reference(session: Session, data_dir: Path | None = None) -> dict[str, 
                 "south": c.bbox[1],
                 "east": c.bbox[2],
                 "north": c.bbox[3],
+                "regions": regions.get(c.slug, []),
+                "wikivoyage": wikivoyage.get(c.slug, []),
             }
             for c in cities
         ],

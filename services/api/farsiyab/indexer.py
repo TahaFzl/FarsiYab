@@ -49,6 +49,8 @@ def city_info(city: City) -> CityInfo:
         name_en=city.name_en,
         center=(0.0, 0.0),
         bbox=(city.west, city.south, city.east, city.north),
+        regions=tuple(city.regions or ()),
+        wikivoyage=tuple(city.wikivoyage or ()),
     )
 
 

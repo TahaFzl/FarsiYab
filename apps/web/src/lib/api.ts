@@ -155,6 +155,7 @@ export const browserApi = {
   jobStream: (jobId: string) => `/api/v1/search/jobs/${jobId}/stream`,
   report: (businessId: string) => `/api/v1/businesses/${businessId}/reports`,
   submissions: "/api/v1/submissions",
+  addCity: (lang: Locale) => `/api/v1/cities?lang=${lang}`,
   claims: (businessId: string) => `/api/v1/businesses/${businessId}/claims`,
   verifyClaim: (claimId: string) => `/api/v1/claims/${claimId}/verify`,
   owner: (claimId: string, lang: Locale) => `/api/v1/owner/${claimId}?lang=${lang}`,

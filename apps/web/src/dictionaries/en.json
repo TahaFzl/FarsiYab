@@ -13,16 +13,17 @@
     "submit": "Add a business"
   },
   "form": {
-    "country": "Country",
     "city": "City",
-    "chooseCountry": "Choose a country",
-    "chooseCity": "Choose a city",
-    "loadingCities": "Loading cities…",
     "categories": "What are you looking for?",
     "categoriesHint": "One or more categories",
     "search": "Search",
     "needCategory": "Choose at least one category",
-    "needCity": "Choose a country and a city"
+    "needCity": "Choose a city from the list",
+    "cityPlaceholder": "Type a city, e.g. Toronto or Berlin",
+    "searchingCities": "Searching cities…",
+    "noCity": "No city with this name.",
+    "cityFailed": "This city could not be added. Please try again.",
+    "addingCity": "Preparing the city…"
   },
   "results": {
     "title": "{categories} in {city}",
@@ -111,11 +112,6 @@
   "submit": {
     "title": "Add a business",
     "intro": "Know an Iranian or Persian-speaking business that FarsiYab is missing? Tell us about it. It will be shown after we review it.",
-    "country": "Country",
-    "city": "City",
-    "chooseCountry": "Choose a country",
-    "chooseCity": "Choose a city",
-    "loadingCities": "Loading cities…",
     "name": "Business name",
     "nameHint": "As on its sign or page, in Persian or Latin script",
     "category": "Category",

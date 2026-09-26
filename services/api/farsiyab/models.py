@@ -71,6 +71,13 @@ class City(Base):
     east: Mapped[float] = mapped_column(Float)
     north: Mapped[float] = mapped_column(Float)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    # States/provinces/départements whose registries are read (IRS, CRA, ACNC, ...).
+    regions: Mapped[list[str]] = mapped_column(default=list)
+    wikivoyage: Mapped[list[str]] = mapped_column(default=list)
+    # "N123" / "W123" / "R123" for cities added by visitors (farsiyab/places.py).
+    osm_id: Mapped[str | None] = mapped_column(Text, unique=True)
+    added_by: Mapped[str] = mapped_column(Text, default="curated")  # curated | visitor
+    created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
 
     country: Mapped[Country] = relationship()
 

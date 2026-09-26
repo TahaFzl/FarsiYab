@@ -1,4 +1,6 @@
-# MVP countries and cities (docs/06-categories-and-locations.md).
+# Curated cities (docs/06-categories-and-locations.md): shown as "browse by city" and
+# tuned by hand. Visitors can search any other city; those are created on first use
+# from OpenStreetMap (farsiyab/places.py) and live only in the database.
 #
 # bbox is [west, south, east, north] in WGS84 and deliberately covers the
 # metro area, not just the city limits, because Iranian businesses cluster in

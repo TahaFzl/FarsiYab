@@ -14,7 +14,7 @@ import {
   flattenCategories,
   searchHref,
   type Category,
-  type CityOption,
+  type CityInfo,
   type Country,
   type ConfidenceLabel,
   type SearchParams,
@@ -64,13 +64,13 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
   let data: SearchResponse;
   let categories: Category[];
   let countries: Country[];
-  let cities: CityOption[];
+  let cities: CityInfo[];
   try {
     [data, categories, countries, cities] = await Promise.all([
       api.search(lang, query),
       api.categories(lang),
       api.countries(lang),
-      api.cities(query.country, lang),
+      api.allCities(lang),
     ]);
   } catch (error) {
     if (error instanceof ApiError && (error.status === 404 || error.status === 422)) notFound();
@@ -88,9 +88,10 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
       <SearchForm
         lang={lang}
         text={dict.form}
-        countries={countries}
+        known={cities}
+        countryNames={Object.fromEntries(countries.map((c) => [c.code, c.name]))}
         categories={flat}
-        initial={{ country: query.country, city: query.city, categories: query.categories, cities }}
+        initial={{ country: query.country, city: query.city, name: data.city.name, categories: query.categories }}
         compact
       />
 

@@ -15,7 +15,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Select, exists, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from farsiyab import claims, jobs, submissions
+from farsiyab import claims, jobs, places, submissions
 from farsiyab.config import get_settings
 from farsiyab.db import session_factory
 from farsiyab.detection.signals import label as signal_label
@@ -38,7 +38,7 @@ from farsiyab.models import (
     SourceRecord,
     Submission,
 )
-from farsiyab.reference import load_regions, registry_links_for
+from farsiyab.reference import registry_links_for
 
 Lang = Literal["fa", "en"]
 MIN_SCORE = {"low": 0.25, "medium": 0.45, "high": 0.75}
@@ -410,7 +410,7 @@ def search(
                 "hint": r["hint_fa"] if lang == "fa" else r["hint_en"],
             }
             for r in registry_links_for(
-                load_regions().get(city_row.slug, []), city_row.country_code, slugs
+                list(city_row.regions or ()), city_row.country_code, slugs
             )
         ],
         "results": _serialize(session, rows, lang),
@@ -586,6 +586,48 @@ def get_business(session: SessionDep, business_id: uuid.UUID, lang: Lang = "fa")
     card = _serialize(session, rows, lang)[0]
     card["city"] = {"slug": city.slug, "country": city.country_code, "name": _name(city, lang)}
     return card
+
+
+# ── Any city in the world (farsiyab/places.py) ────────────────────────────────
+
+NEW_CITIES_PER_CLIENT_PER_DAY = 10
+NEW_CITIES_PER_DAY = 200  # each new city costs a full index run
+_new_cities_by_client: dict[str, int] = defaultdict(int)
+
+
+@app.get("/api/v1/places")
+def place_suggestions(q: str, lang: Lang = "fa") -> list[dict[str, Any]]:
+    """City suggestions while the visitor types (Photon; nothing is stored)."""
+    try:
+        return [s.as_dict() for s in places.suggest(q, lang)]
+    except places.PlaceError as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+class NewCityIn(BaseModel):
+    osm_id: str = Field(pattern=r"^[NWR]\d{1,12}$")
+
+
+@app.post("/api/v1/cities")
+def add_city(session: SessionDep, body: NewCityIn, request: Request, lang: Lang = "fa") -> dict:
+    """The city for a picked suggestion; created (and later indexed) on first use."""
+    existing = session.scalar(select(City).where(City.osm_id == body.osm_id))
+    if existing is None:
+        today = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+        created_today = session.scalar(select(func.count()).where(
+            City.added_by == "visitor", City.created_at >= today))
+        hashed = submissions.client_hash(request.client.host if request.client else None) or ""
+        if (created_today >= NEW_CITIES_PER_DAY
+                or _new_cities_by_client[hashed] >= NEW_CITIES_PER_CLIENT_PER_DAY):
+            raise HTTPException(429, "too many new cities today")
+        try:
+            existing = places.create_city(session, body.osm_id)
+        except places.PlaceError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        session.commit()
+        _new_cities_by_client[hashed] += 1
+    return {"slug": existing.slug, "country": existing.country_code,
+            "name": _name(existing, lang)}
 
 
 # ── Owner claims (docs/sources/user-submissions.md, "ادعای مالکیت") ─────────────

@@ -169,9 +169,11 @@ class WikivoyageAdapter:
     id = "wikivoyage"
 
     def __init__(
-        self, pages: dict[str, list[str]], client: httpx.Client | None = None, delay: float = 1.0
+        self, pages: dict[str, list[str]] | None = None, client: httpx.Client | None = None,
+        delay: float = 1.0,
     ):
-        self.pages = pages  # city slug -> Wikivoyage page titles
+        # city slug -> Wikivoyage page titles; by default the city's own `wikivoyage`.
+        self.pages = pages or {}
         self.client = _client(client)
         self.delay = delay
 
@@ -189,7 +191,7 @@ class WikivoyageAdapter:
         return [base] + [p["title"] for p in data.get("query", {}).get("allpages", [])]
 
     def fetch(self, city: CityInfo) -> Iterator[RawListing]:
-        for base in self.pages.get(city.slug, []):
+        for base in self.pages.get(city.slug) or list(city.wikivoyage):
             for title in self.page_titles(base):
                 data = self._get({"action": "parse", "page": title, "prop": "wikitext",
                                   "formatversion": "2"})

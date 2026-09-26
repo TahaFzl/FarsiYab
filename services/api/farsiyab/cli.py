@@ -34,7 +34,6 @@ from farsiyab.geocode import Geocoder
 from farsiyab.indexer import index_city
 from farsiyab.loader import load_reference
 from farsiyab.models import City, IndexStatus, Job
-from farsiyab.reference import load_regions, load_wikivoyage_pages
 from farsiyab.scheduling import coverage as coverage_rows
 from farsiyab.scheduling import coverage_markdown
 from farsiyab.scheduling import schedule as schedule_jobs
@@ -56,15 +55,15 @@ ADAPTERS: dict[str, AdapterFactory] = {
     "overture": lambda release: OvertureAdapter(release=release),
     "osm": lambda release: OsmAdapter(),
     "wikidata": lambda release: WikidataAdapter(),
-    "wikivoyage": lambda release: WikivoyageAdapter(load_wikivoyage_pages()),
+    "wikivoyage": lambda release: WikivoyageAdapter(),
     "gov:la_business": lambda release: LosAngelesAdapter(),
     "gov:vancouver_business": lambda release: VancouverAdapter(),
     "gov:toronto_business": lambda release: TorontoAdapter(_geocoder()),
-    "gov:irs_eo_bmf": lambda release: IrsAdapter(load_regions(), _geocoder()),
-    "gov:cra_charities": lambda release: CraAdapter(load_regions(), _geocoder()),
-    "gov:uk_charities": lambda release: UkCharityAdapter(load_regions(), _geocoder()),
-    "gov:acnc_charities": lambda release: AcncAdapter(load_regions(), _geocoder()),
-    "gov:fr_sirene": lambda release: SireneAdapter(load_regions()),
+    "gov:irs_eo_bmf": lambda release: IrsAdapter(geocoder=_geocoder()),
+    "gov:cra_charities": lambda release: CraAdapter(geocoder=_geocoder()),
+    "gov:uk_charities": lambda release: UkCharityAdapter(geocoder=_geocoder()),
+    "gov:acnc_charities": lambda release: AcncAdapter(geocoder=_geocoder()),
+    "gov:fr_sirene": lambda release: SireneAdapter(),
     **{
         directory_id: (lambda release, d=directory: DirectoryAdapter(d()))
         for directory_id, directory in DIRECTORIES.items()

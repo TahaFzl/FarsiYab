@@ -2,16 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 
-import { useCities } from "@/hooks/useCities";
-import { browserApi, type CategoryOption, type Country } from "@/lib/api";
+import { CityPicker, type KnownCity, type PickedCity } from "@/components/CityPicker";
+import type { SearchFormText } from "@/components/SearchForm";
+import { browserApi, type CategoryOption } from "@/lib/api";
 import type { Locale } from "@/lib/i18n";
 
 export interface SubmitFormText {
-  country: string;
-  city: string;
-  chooseCountry: string;
-  chooseCity: string;
-  loadingCities: string;
   name: string;
   nameHint: string;
   category: string;
@@ -41,17 +37,20 @@ const MAX_LINKS = 5;
 export function SubmitForm({
   lang,
   text,
-  countries,
+  cityText,
+  known,
+  countryNames,
   categories,
 }: {
   lang: Locale;
   text: SubmitFormText;
-  countries: Country[];
+  cityText: SearchFormText;
+  known: KnownCity[];
+  countryNames: Record<string, string>;
   categories: CategoryOption[];
 }) {
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const { cities, loading } = useCities(country, lang);
+  const [picked, setPicked] = useState<PickedCity | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [links, setLinks] = useState([""]);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "failed" | "tooMany" | "invalid">(
     "idle",
@@ -70,8 +69,8 @@ export function SubmitForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          country,
-          city,
+          country: picked?.country,
+          city: picked?.city,
           name: value("name"),
           category: value("category"),
           address: value("address"),
@@ -122,44 +121,22 @@ export function SubmitForm({
 
   return (
     <form onSubmit={submit} className="space-y-5 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-7">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className={label}>
-          <span className={caption}>{text.country}</span>
-          <select
-            className={input}
-            value={country}
-            required
-            onChange={(e) => {
-              setCountry(e.target.value);
-              setCity("");
-            }}
-          >
-            <option value="">{text.chooseCountry}</option>
-            {countries.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={label}>
-          <span className={caption}>{text.city}</span>
-          <select
-            className={input}
-            value={city}
-            required
-            disabled={!country || loading}
-            onChange={(e) => setCity(e.target.value)}
-          >
-            <option value="">{loading ? text.loadingCities : text.chooseCity}</option>
-            {cities.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <CityPicker
+        lang={lang}
+        text={{
+          city: cityText.city,
+          cityPlaceholder: cityText.cityPlaceholder,
+          searching: cityText.searchingCities,
+          noMatch: cityText.noCity,
+          failed: cityText.cityFailed,
+          adding: cityText.addingCity,
+        }}
+        known={known}
+        countryNames={countryNames}
+        value={picked}
+        onChange={setPicked}
+        onBusy={setPreparing}
+      />
 
       <label className={label}>
         <span className={caption}>{text.name}</span>
@@ -246,7 +223,7 @@ export function SubmitForm({
       )}
       <button
         type="submit"
-        disabled={state === "sending"}
+        disabled={state === "sending" || preparing}
         className="rounded-lg bg-primary px-8 py-2.5 font-semibold text-white hover:bg-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
       >
         {state === "sending" ? text.sending : text.send}

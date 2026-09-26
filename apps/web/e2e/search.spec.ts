@@ -16,9 +16,8 @@ test("search from the home page shows results with sources and evidence", async 
   await page.goto("/fa");
   await shot(page, "home", info.project.name);
 
-  await page.getByLabel("کشور").selectOption("CA");
-  await expect(page.getByLabel("شهر")).toBeEnabled();
-  await page.getByLabel("شهر").selectOption("toronto");
+  await page.getByRole("combobox", { name: "شهر" }).fill("تورن");
+  await page.getByRole("option", { name: /تورنتو/ }).click();
   await page.getByRole("button", { name: "رستوران و کافه" }).click();
   await page.getByRole("button", { name: "جست‌وجو", exact: true }).click();
 
@@ -37,8 +36,8 @@ test("search from the home page shows results with sources and evidence", async 
 
 test("form validation asks for a category", async ({ page }) => {
   await page.goto("/fa");
-  await page.getByLabel("کشور").selectOption("DE");
-  await page.getByLabel("شهر").selectOption("hamburg");
+  await page.getByRole("combobox", { name: "شهر" }).fill("Hamb");
+  await page.getByRole("option", { name: /هامبورگ/ }).click();
   await page.getByRole("button", { name: "جست‌وجو", exact: true }).click();
   await expect(page.locator("form").getByRole("alert")).toHaveText("حداقل یک دسته را انتخاب کنید");
 });
@@ -77,6 +76,19 @@ test("results can be shown on a map", async ({ page }) => {
   const map = page.getByRole("region", { name: "نمایش روی نقشه" });
   await expect(map.locator(".leaflet-interactive").first()).toBeVisible();
   await expect(page.getByText(/نتیجه روی نقشه/)).toBeVisible();
+});
+
+test("any city can be picked; a new one is added and queued", async ({ page }) => {
+  await page.goto("/fa");
+  await page.getByRole("combobox", { name: "شهر" }).fill("Oslo");
+  // Known cities come first; Oslo is new, so it comes from the place search.
+  await page.getByRole("option", { name: /^Oslo (نروژ|Norway)/ }).first().click();
+  await expect(page.getByRole("combobox", { name: "شهر" })).toHaveValue(/اسلو|Oslo/);
+  await page.getByRole("button", { name: "رستوران و کافه" }).click();
+  await page.getByRole("button", { name: "جست‌وجو", exact: true }).click();
+  await expect(page).toHaveURL(/\/fa\/search\?country=NO&city=oslo/);
+  // Never indexed: the live search starts.
+  await expect(page.getByText(/در حال|در صف/).first()).toBeVisible();
 });
 
 test("static pages render", async ({ page }) => {

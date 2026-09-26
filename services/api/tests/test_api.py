@@ -1,9 +1,10 @@
 
 import pytest
+from sqlalchemy import select
 
 from farsiyab import jobs
 from farsiyab.indexer import recompute_scores, store_listing
-from farsiyab.models import Business
+from farsiyab.models import Business, City
 from tests.test_pipeline import listing
 
 
@@ -16,7 +17,9 @@ def search(client, **params):
 
 def test_reference_endpoints(client):
     countries = client.get("/api/v1/countries").json()
-    assert {c["code"]: c["city_count"] for c in countries} == {"CA": 3, "DE": 3, "US": 4}
+    assert {c["code"]: c["city_count"] for c in countries} == {
+        "CA": 3, "DE": 3, "US": 4, "GB": 2, "SE": 2, "NL": 1, "FR": 1, "AU": 2, "TR": 1, "AE": 1,
+    }
     cities = client.get("/api/v1/countries/ca/cities", params={"q": "tor", "lang": "en"}).json()
     assert cities == [{"slug": "toronto", "name": "Toronto", "name_en": "Toronto"}]
     doctor = next(c for c in client.get("/api/v1/categories").json() if c["slug"] == "doctor")
@@ -170,8 +173,24 @@ def test_all_cities_count_shown_results_per_top_level_category(client, toronto_d
     recompute_scores(db, toronto_data.id)
     db.commit()
     cities = {c["slug"]: c for c in client.get("/api/v1/cities").json()}
-    assert len(cities) == 10
+    assert len(cities) == 20
     # The weak "Dr. Karimzadeh Dental" is not shown, so it is not counted.
     assert cities["toronto"]["category_counts"] == {"restaurant": 1, "grocery": 1, "doctor": 1}
     assert cities["toronto"]["country"] == "CA" and cities["toronto"]["last_indexed_at"]
     assert cities["berlin"]["category_counts"] == {}
+
+
+def test_turkey_needs_more_than_one_weak_signal(client, db):
+    # "Tehran Market" alone is an Iranian place name (0.3): shown in Toronto, not in
+    # Istanbul, where Iranian names are everywhere (docs/06).
+    for slug, lat, lng in (("toronto", 43.6, -79.4), ("istanbul", 41.0, 29.0)):
+        city = db.scalar(select(City).where(City.slug == slug))
+        store_listing(db, city, listing(external_id=f"t-{slug}", name="Tehran Market",
+                                        lat=lat, lng=lng, category="grocery"))
+        recompute_scores(db, city.id)
+    db.commit()
+    assert search(client, categories="grocery")["total"] == 1
+    istanbul = search(client, country="TR", city="istanbul", categories="grocery")
+    assert istanbul["total"] == 0
+    counts = {c["slug"]: c["category_counts"] for c in client.get("/api/v1/cities").json()}
+    assert counts["toronto"] == {"grocery": 1} and counts["istanbul"] == {}

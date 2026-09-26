@@ -23,6 +23,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: "", label: t.nav.overview },
     { href: "/submissions", label: t.nav.submissions, badge: badge(overview.pending_submissions) },
     { href: "/reports", label: t.nav.reports, badge: badge(overview.open_reports) },
+    { href: "/claims", label: t.nav.claims, badge: badge(overview.pending_claims) },
     { href: "/labels", label: t.nav.labels },
     { href: "/sources", label: t.nav.sources },
   ];

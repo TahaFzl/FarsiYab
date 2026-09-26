@@ -40,3 +40,23 @@ persa
 پارسی
 فارسی‌زبان
 فارسی زبان
+# Phase 5 languages
+# Swedish (and Danish/Norwegian persisk)
+persisk
+persiska
+persiskt
+iransk
+iranska
+iranskt
+# Dutch
+perzisch
+perzische
+iraans
+iraanse
+# Turkish (normalized: İ/ı -> i)
+iranli
+farsça
+iran mutfaği
+iran restoranı
+# Arabic spellings (normalized to the Persian ones above): إيراني، فارسي
+إيرانية

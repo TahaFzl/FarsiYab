@@ -40,6 +40,7 @@ export interface Precision {
 
 export interface Overview {
   pending_submissions: number;
+  pending_claims: number;
   open_reports: number;
   hidden_businesses: number;
   labels: number;
@@ -82,6 +83,17 @@ export interface ReportGroup {
     created_at: string;
     review_note: string | null;
   }[];
+}
+
+export interface AdminClaim {
+  id: string;
+  method: "website" | "telegram" | "manual";
+  token: string;
+  contact_email: string | null;
+  note: string | null;
+  status: "pending" | "verified" | "rejected";
+  created_at: string;
+  business: AdminBusiness | null;
 }
 
 export interface AdminSource {
@@ -166,5 +178,6 @@ export const admin = {
       `/labels/next?lang=${lang}${city ? `&city=${encodeURIComponent(city)}` : ""}`,
     ),
   sources: (lang: Locale) => adminFetch<AdminSource[]>(lang, `/sources?lang=${lang}`),
+  claims: (lang: Locale) => adminFetch<AdminClaim[]>(lang, `/claims?lang=${lang}`),
   jobs: (lang: Locale) => adminFetch<AdminJob[]>(lang, "/jobs"),
 };

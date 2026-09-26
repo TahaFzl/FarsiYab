@@ -92,7 +92,8 @@ def test_osm_category_mapping(tags, expected):
 
 def test_city_bounding_boxes_are_sane():
     cities = load_cities()
-    assert len(cities) == 10
+    assert len(cities) == 20
+    assert len({c.slug for c in cities}) == 20
     for c in cities:
         west, south, east, north = c.bbox
         assert west < c.center[0] < east and south < c.center[1] < north, c.slug

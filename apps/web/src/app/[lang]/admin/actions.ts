@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 
 import { adminFetch, clearAdminToken, setAdminToken, tokenStatus } from "@/lib/admin";
 import { hasLocale, type Locale } from "@/lib/i18n";
+import { siteUrl } from "@/lib/site";
 
 function field(form: FormData, key: string): string {
   return String(form.get(key) ?? "").trim();
@@ -74,4 +75,28 @@ export async function setSource(form: FormData) {
 
 export async function indexCity(form: FormData) {
   await post(form, "/index", { city: field(form, "city") });
+}
+
+export type GrantState = { link: string | null; email: string | null; error: boolean };
+
+export async function grantClaim(_state: GrantState, form: FormData): Promise<GrantState> {
+  const lang = localeOf(form);
+  const id = field(form, "id");
+  try {
+    const { owner_key, contact_email } = await adminFetch<{ owner_key: string; contact_email: string }>(
+      lang,
+      `/claims/${id}/verify`,
+      { method: "POST" },
+    );
+    refresh(lang);
+    // The admin sends this link to the owner; the key is never stored in clear.
+    return { link: `${siteUrl()}/${lang}/owner/${id}#key=${owner_key}`, email: contact_email, error: false };
+  } catch (error) {
+    unstable_rethrow(error); // let the redirect to the login page through
+    return { link: null, email: null, error: true };
+  }
+}
+
+export async function rejectClaim(form: FormData) {
+  await post(form, `/claims/${field(form, "id")}/reject`, {});
 }

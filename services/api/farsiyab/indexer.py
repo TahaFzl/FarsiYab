@@ -13,11 +13,13 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from farsiyab.adapters.base import RawListing, SourceAdapter, SourceUnavailable
+from farsiyab.adapters.telegram import TelegramChecker
 from farsiyab.adapters.website import WebsiteChecker, WebsiteResult
 from farsiyab.config import Settings, get_settings
 from farsiyab.detection import script
 from farsiyab.detection.detector import confidence_label, detect, has_positive, score
 from farsiyab.detection.signals import Signal
+from farsiyab.display import threshold_for
 from farsiyab.links import Link, classify_url, phone_link, website_link
 from farsiyab.models import (
     Business,
@@ -357,6 +359,62 @@ def check_websites(
     return {"checked": len(candidates), **outcome}
 
 
+def telegram_candidates(
+    session: Session, city_id: int, settings: Settings
+) -> list[tuple[uuid.UUID, str]]:
+    """(business, channel name) for Telegram links of possibly-Iranian businesses that
+    were not checked in the last month; one channel per business."""
+    cutoff = datetime.now(UTC) - timedelta(days=settings.website_recheck_days)
+    rows = session.execute(
+        select(Business.id, BusinessLink.value)
+        .join(BusinessLink, BusinessLink.business_id == Business.id)
+        .where(
+            Business.city_id == city_id,
+            Business.status == "active",
+            Business.confidence_score >= settings.min_score_for_website_check,
+            BusinessLink.kind == "telegram",
+            (Business.telegram_checked_at.is_(None)) | (Business.telegram_checked_at < cutoff),
+        )
+        .order_by(Business.id, BusinessLink.id)
+    ).all()
+    first: dict[uuid.UUID, str] = {}
+    for business_id, name in rows:
+        first.setdefault(business_id, name)
+    return list(first.items())
+
+
+def check_telegram(
+    session: Session,
+    city: City,
+    settings: Settings,
+    checker_factory: Callable[[], TelegramChecker] = TelegramChecker,
+) -> dict[str, Any]:
+    candidates = telegram_candidates(session, city.id, settings)
+    if not candidates:
+        return {"checked": 0}
+    log.info("telegram: checking %d channels in %s", len(candidates), city.slug)
+    checker = checker_factory()
+    outcome: Counter[str] = Counter()
+    for business_id, name in candidates:
+        result = checker.check(name)
+        if result.retryable:
+            outcome["retry_later"] += 1
+            continue
+        session.get(Business, business_id).telegram_checked_at = datetime.now(UTC)
+        if not result.ok or not result.exists:
+            outcome["not_found"] += 1
+            continue
+        if result.signals:
+            record = _upsert_record(session, business_id, "telegram", name, result.url,
+                                    {"title": result.title})
+            _replace_evidence(session, record, result.signals)
+            outcome["with_evidence"] += 1
+        else:
+            outcome["no_evidence"] += 1
+    session.commit()
+    return {"checked": len(candidates), **outcome}
+
+
 def index_city(
     session: Session,
     city_slug: str,
@@ -365,6 +423,7 @@ def index_city(
     settings: Settings | None = None,
     checker_factory: Callable[[], WebsiteChecker] = WebsiteChecker,
     on_progress: Callable[[dict[str, Any]], None] | None = None,
+    telegram_factory: Callable[[], TelegramChecker] | None = None,
 ) -> dict[str, Any]:
     """Index one city. `on_progress` receives the report so far after each stage."""
     settings = settings or get_settings()
@@ -411,12 +470,17 @@ def index_city(
         report["sources"]["website"] = {"status": "running"}
         notify(report)
         report["sources"]["website"] = check_websites(session, city, settings, checker_factory)
+        report["sources"]["telegram"] = {"status": "running"}
+        notify(report)
+        report["sources"]["telegram"] = check_telegram(
+            session, city, settings, telegram_factory or TelegramChecker
+        )
         recompute_scores(session, city.id)
 
     status = session.get(IndexStatus, city.id) or IndexStatus(city_id=city.id)
     status.last_indexed_at = datetime.now(UTC)
     status.per_source = report["sources"]
-    status.category_counts = _category_counts(session, city.id, settings.min_display_score)
+    status.category_counts = _category_counts(session, city.id, threshold_for(session, city))
     session.add(status)
     session.commit()
     report["category_counts"] = status.category_counts

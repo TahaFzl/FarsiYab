@@ -29,6 +29,8 @@ JOB_STATUSES = ("queued", "running", "done", "failed")
 REPORT_REASONS = ("not_iranian", "closed", "wrong_info", "remove_request")
 REPORT_STATUSES = ("open", "resolved", "dismissed")
 SUBMISSION_STATUSES = ("pending", "approved", "rejected")
+CLAIM_METHODS = ("website", "telegram", "manual")
+CLAIM_STATUSES = ("pending", "verified", "rejected")
 
 
 TZ = DateTime(timezone=True)
@@ -50,6 +52,9 @@ class Country(Base):
     name_fa: Mapped[str] = mapped_column(Text)
     name_en: Mapped[str] = mapped_column(Text)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Stricter than the global threshold where Persian script and Iranian names are
+    # common without meaning an Iranian business (docs/06, Turkey and the UAE).
+    min_display_score: Mapped[float | None] = mapped_column(Float)
 
 
 class City(Base):
@@ -127,6 +132,9 @@ class Business(Base):
         TZ, server_default=NOW()
     )
     website_checked_at: Mapped[datetime | None] = mapped_column(TZ)
+    telegram_checked_at: Mapped[datetime | None] = mapped_column(TZ)
+    # Set when the owner proved control and confirmed the details (farsiyab/claims.py).
+    owner_verified_at: Mapped[datetime | None] = mapped_column(TZ)
 
     categories: Mapped[list["BusinessCategory"]] = relationship(cascade="all, delete-orphan")
     records: Mapped[list["SourceRecord"]] = relationship(cascade="all, delete-orphan")
@@ -282,6 +290,32 @@ class Submission(Base):
     review_note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
     reviewed_at: Mapped[datetime | None] = mapped_column(TZ)
+
+
+class Claim(Base):
+    """An owner's request to manage a business. The owner proves control by putting
+    `token` on the business's own website or Telegram channel, or an admin checks by
+    other means (method "manual"). Only a hash of the owner's edit key is stored."""
+
+    __tablename__ = "claim"
+    __table_args__ = (
+        CheckConstraint(_in("method", CLAIM_METHODS), name="method_valid"),
+        CheckConstraint(_in("status", CLAIM_STATUSES), name="status_valid"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    business_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("business.id", ondelete="CASCADE"), index=True
+    )
+    method: Mapped[str] = mapped_column(Text)
+    token: Mapped[str] = mapped_column(Text)
+    contact_email: Mapped[str | None] = mapped_column(Text)
+    note: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, default="pending")
+    owner_key_hash: Mapped[str | None] = mapped_column(Text)
+    client_hash: Mapped[str | None] = mapped_column(Text, index=True)
+    created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
+    verified_at: Mapped[datetime | None] = mapped_column(TZ)
 
 
 class Label(Base):

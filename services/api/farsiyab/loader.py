@@ -30,7 +30,11 @@ def load_reference(session: Session, data_dir: Path | None = None) -> dict[str, 
     countries = load_countries(data_dir)
     _upsert(
         session, Country,
-        [{"code": c["code"], "name_fa": c["name_fa"], "name_en": c["name_en"]} for c in countries],
+        [
+            {"code": c["code"], "name_fa": c["name_fa"], "name_en": c["name_en"],
+             "min_display_score": c.get("min_display_score")}
+            for c in countries
+        ],
         "code",
     )
 

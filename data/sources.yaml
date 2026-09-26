@@ -280,6 +280,51 @@ sources:
     signals: [explicit_keyword, iranian_place_name]
     doc: docs/sources/government-open-data.md
 
+
+  - id: gov:uk_charities
+    name_fa: خیریه‌های بریتانیا (Charity Commission)
+    name_en: UK Charity Commission register
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: Open Government Licence v3.0
+    storage: facts_only
+    refresh: weekly (with the city)
+    status: mvp
+    phase: 5
+    tested: true  # 2026-09-26: live download checked
+    signals: [explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:acnc_charities
+    name_fa: خیریه‌های استرالیا (ACNC)
+    name_en: Australian charities register (ACNC)
+    kind: discovery
+    access: open_dataset
+    account_required: false
+    license: CC BY 3.0 AU
+    storage: facts_only
+    refresh: weekly (with the city)
+    status: mvp
+    phase: 5
+    tested: true  # 2026-09-26: live download checked
+    signals: [explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
+
+  - id: gov:fr_sirene
+    name_fa: ثبت شرکت‌های فرانسه (SIRENE)
+    name_en: French company register (SIRENE)
+    kind: discovery
+    access: official_api
+    account_required: false
+    license: Licence Ouverte 2.0 (Etalab)
+    storage: facts_only
+    refresh: weekly (with the city)
+    status: mvp
+    phase: 5
+    tested: false  # response shape checked from outside; the dev network cannot reach the API
+    signals: [explicit_keyword, iranian_place_name]
+    doc: docs/sources/government-open-data.md
   - id: gov:corporations_canada
     name_fa: شرکت‌های فدرال کانادا
     name_en: Corporations Canada
@@ -351,9 +396,9 @@ sources:
     license: n/a
     storage: ids_only
     refresh: monthly
-    status: candidate
+    status: mvp
     phase: 5
-    tested: false
+    tested: true
     signals: []
     doc: docs/sources/telegram.md
 

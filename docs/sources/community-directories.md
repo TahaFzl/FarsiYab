@@ -47,6 +47,18 @@
 | Persian Biz | https://persianbiz.info | استرالیا | 🔗 فقط لینک — ToS ممنوع کرده و داده‌اش از Google Places است |
 | Persian Network | https://persiannetwork.com.au/directory | استرالیا | ❌ فقط با JavaScript / چالش ضدربات |
 
+### کشورهای فاز ۵ (بررسی ۲۰۲۶-۰۹-۲۶)
+| نام | URL | پوشش | تصمیم |
+|---|---|---|---|
+| Iranmehr | https://iranmehr.com | ۲۴ شهر، از جمله لندن، سیدنی و دبی | 🔗 فقط لینک. `robots.txt` اجازه می‌دهد، ولی ToS صریحاً scraping و «bulk-harvest» را ممنوع کرده است (در `llms.txt` فقط پاسخ به سؤال‌های موردی مجاز شده) |
+| Perzie (Iraanse Gouden Gids) | https://www.perzie.com | هلند | 🔗 فقط لینک؛ حق پایگاه داده‌ی اتحادیه‌ی اروپا |
+| Persian Dutch Network | https://persiandutch.com | هلند | 🔗 فقط لینک؛ حق پایگاه داده‌ی اتحادیه‌ی اروپا |
+| Adım | https://adim.top | ترکیه و ایران | ❌ دایرکتوری تجارت B2B بین دو کشور است، نه کسب‌وکارهای محلی |
+| Persia Page (استکهلم و استانبول) | https://persiapage.com | | 🔗 فقط لینک (همان تصمیم قبلی: ToS ممنوع کرده) |
+| Nazdikia (دبی) | https://nazdikia.com | | 🔗 فقط لینک (همان تصمیم قبلی) |
+
+برای فرانسه، به‌جای دایرکتوری، **ثبت رسمی شرکت‌ها (SIRENE)** از طریق API دولتی و بدون حساب اضافه شد (`gov:fr_sirene`، [government-open-data.md](government-open-data.md)). برای بریتانیا و استرالیا هم ثبت خیریه‌ها اضافه شد. در این کشورها هیچ دایرکتوری ایرانی‌ای پیدا نشد که هم در دسترس باشد و هم اجازه‌ی خواندن بدهد، پس **پیشنهاد همکاری مستقیم** (ایمیل به Iranmehr، Nazdikia، IraniLink و Perzie) مهم‌ترین قدم بعدی برای این کشورهاست.
+
 ### اتاق‌های بازرگانی و انجمن‌ها
 - Deutsch-Iranische Handelskammer (هامبورگ)
 - Swedish Iranian Chamber of Commerce (https://www.sicc.se)

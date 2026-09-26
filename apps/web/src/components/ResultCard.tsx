@@ -62,6 +62,11 @@ export function ResultCard({ result, lang, dict, categoryNames, actions }: Props
             </p>
           )}
           <p className="flex flex-wrap gap-1.5 pt-1">
+            {result.owner_verified && (
+              <span className="rounded-md bg-primary-soft px-2 py-0.5 text-xs text-primary-strong">
+                ✓ {dict.claim.ownerBadge}
+              </span>
+            )}
             {result.categories.map((slug) => (
               <span key={slug} className="rounded-md bg-background px-2 py-0.5 text-xs text-muted">
                 {categoryNames[slug] ?? slug}
@@ -135,7 +140,12 @@ export function ResultCard({ result, lang, dict, categoryNames, actions }: Props
         <span className="flex items-center gap-3">
           <span>{fill(t.verified, { date: formatDate(lang, result.last_verified_at) })}</span>
           {actions ?? (
-            <ReportButton businessId={result.id} name={title ?? ""} text={dict.report} buttonLabel={t.report} />
+            <>
+              <a href={`/${lang}/claim/${result.id}`} className="text-muted underline-offset-2 hover:text-primary hover:underline">
+                {dict.claim.cardLink}
+              </a>
+              <ReportButton businessId={result.id} name={title ?? ""} text={dict.report} buttonLabel={t.report} />
+            </>
           )}
         </span>
       </footer>

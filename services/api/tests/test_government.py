@@ -1,12 +1,20 @@
+import io
+import json
+import zipfile
+
 import httpx
 import pytest
 
 from farsiyab.adapters.government import (
+    AcncAdapter,
     CraAdapter,
     IrsAdapter,
     LosAngelesAdapter,
+    SireneAdapter,
     TorontoAdapter,
+    UkCharityAdapter,
     VancouverAdapter,
+    naf_category,
     naics_category,
 )
 from farsiyab.detection.detector import detect
@@ -212,3 +220,127 @@ def test_address_cleaning(address, cleaned, code):
 
     assert clean_address(address) == cleaned
     assert postal_code(address) == code
+
+
+LONDON = CityInfo(slug="london", country="GB", name_fa="لندن", name_en="London",
+                  center=(-0.13, 51.51), bbox=(-0.51, 51.29, 0.33, 51.69))
+SYDNEY = CityInfo(slug="sydney", country="AU", name_fa="سیدنی", name_en="Sydney",
+                  center=(151.21, -33.87), bbox=(150.60, -34.15, 151.35, -33.55))
+
+
+def uk_extract(records):
+    """A zip shaped like publicextract.charity.zip: a JSON array, one record per line."""
+    lines = "[" + "\n,".join(json.dumps(r) for r in records) + "]"
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("publicextract.charity.json", "﻿" + lines)
+    return buffer.getvalue()
+
+
+def uk_record(number, name, status="Registered", linked=0, postcode="W9 1SF", web=None):
+    return {"registered_charity_number": number, "linked_charity_number": linked,
+            "charity_name": name, "charity_registration_status": status,
+            "charity_contact_address1": "1 Some Road", "charity_contact_address2": "London",
+            "charity_contact_postcode": postcode, "charity_contact_web": web}
+
+
+def test_uk_charities_keep_registered_main_charities_in_the_city():
+    content = uk_extract([
+        uk_record(1, "PARS CULTURAL CENTRE", web="www.pars.example"),
+        uk_record(2, "IRANIAN COMMUNITY SERVICE", status="Removed"),  # no longer registered
+        uk_record(1, "PARS CULTURAL CENTRE LONDON BRANCH", linked=1),  # a linked subsidiary
+        uk_record(3, "ANGLO IRANIAN SOCIETY", postcode="BS2 0BW"),  # Bristol
+        uk_record(4, "HITCHAM FREE CHURCH"),  # not Iranian
+    ])
+    client = httpx.Client(transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, content=content)))
+    geocoder = FakeGeocoder({"1 Some Road, London, W9 1SF": (51.52, -0.19),
+                             "1 Some Road, London, BS2 0BW": (51.46, -2.58)})
+    listings = list(UkCharityAdapter({"london": ["ENG"]}, geocoder, client).fetch(LONDON))
+    assert [(x.name, x.external_id, x.urls) for x in listings] == [
+        ("PARS CULTURAL CENTRE", "1", ["https://www.pars.example"]),
+    ]
+    assert listings[0].private_location
+    assert listings[0].url.endswith("/charity-details/1")
+    # The non-Iranian name was never sent to the geocoder.
+    assert not any("HITCHAM" in a for a in geocoder.asked)
+
+
+def test_acnc_reads_other_names_and_filters_by_state():
+    csv_text = (
+        "ABN,Charity_Legal_Name,Other_Organisation_Names,Address_Line_1,Town_City,State,"
+        "Postcode,Charity_Website\n"
+        "1,Persian Library Incorporated,,1 Station St,Harris Park,NSW,2150,persianlib.example\n"
+        "2,Iranian Association Inc,Persian Language School WA,,Mount Pleasant,WA,6153,\n"
+        "3,Community Care Ltd,Persian Happy Family,2 High St,Parramatta,NSW,2150,\n"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "package_show" in str(request.url):
+            return httpx.Response(200, json={"result": {"resources": [
+                {"format": "PDF", "url": "https://x/notes.pdf"},
+                {"format": "CSV", "url": "https://x/datadotgov_main.csv"}]}})
+        return httpx.Response(200, content=csv_text.encode())
+
+    geocoder = FakeGeocoder({"1 Station St, Harris Park, NSW, 2150": (-33.82, 151.01),
+                             "2 High St, Parramatta, NSW, 2150": (-33.81, 151.00)})
+    adapter = AcncAdapter({"sydney": ["NSW"]}, geocoder,
+                          httpx.Client(transport=httpx.MockTransport(handler)))
+    listings = list(adapter.fetch(SYDNEY))
+    assert [(x.name, x.urls) for x in listings] == [
+        ("Persian Library Incorporated", ["https://persianlib.example"]),
+        ("Community Care Ltd", []),  # found through its other name
+    ]
+    assert "Persian Happy Family" in [t.text for t in listings[1].texts]
+
+
+PARIS = CityInfo(slug="paris", country="FR", name_fa="پاریس", name_en="Paris",
+                 center=(2.35, 48.86), bbox=(2.00, 48.65, 2.70, 49.05))
+
+
+def sirene_company(siren, name, nature="5710", diffusion="O", places=None):
+    # Shape of recherche-entreprises.api.gouv.fr/search results (checked 2026-09-26).
+    return {"siren": siren, "nom_complet": name, "nature_juridique": nature,
+            "statut_diffusion": diffusion, "activite_principale": "56.10A",
+            "matching_etablissements": places or [
+                {"siret": f"{siren}00016", "activite_principale": "56.10A", "latitude": "48.845",
+                 "longitude": "2.291", "etat_administratif": "A", "adresse": "Paris 15"}]}
+
+
+def test_sirene_skips_sole_traders_and_keeps_open_places_in_the_box():
+    companies = [
+        sirene_company("111", "CHEZ MINA RESTAURANT PERSAN"),
+        sirene_company("222", "SHIRAZ BAHRAMI", nature="1000"),  # entrepreneur individuel
+        sirene_company("333", "ESKAN EPICERIE IRANIENNE", diffusion="P"),  # not public
+        sirene_company("444", "LE PERSAN IMMOBILIER", places=[
+            {"siret": "44400001", "latitude": "43.3", "longitude": "5.4",  # Marseille
+             "etat_administratif": "A", "activite_principale": "68.31Z"},
+            {"siret": "44400002", "latitude": "48.87", "longitude": "2.33",
+             "etat_administratif": "F", "activite_principale": "68.31Z"},  # closed
+        ]),
+    ]
+    asked = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        asked.append(dict(request.url.params))
+        first = request.url.params["q"] == "persian"
+        return httpx.Response(200, json={"results": companies if first else [], "total_pages": 1})
+
+    adapter = SireneAdapter({"paris": ["75"]}, httpx.Client(transport=httpx.MockTransport(handler)),
+                            delay=0)
+    listings = list(adapter.fetch(PARIS))
+    assert [(x.name, x.external_id, x.category) for x in listings] == [
+        ("CHEZ MINA RESTAURANT PERSAN", "11100016", "restaurant"),
+    ]
+    assert listings[0].private_location
+    assert listings[0].url == "https://annuaire-entreprises.data.gouv.fr/entreprise/111"
+    assert {a["departement"] for a in asked} == {"75"}
+    assert {"persan", "iranien"} <= {a["q"] for a in asked}
+    assert all(a["etat_administratif"] == "A" for a in asked)
+
+
+def test_naf_category():
+    assert naf_category("56.10A") == "restaurant"
+    assert naf_category("86.23Z") == "doctor/dentist"
+    assert naf_category("86.21Z") == "doctor"
+    assert naf_category("01.11Z") == "other"

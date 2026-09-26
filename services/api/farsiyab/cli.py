@@ -16,10 +16,13 @@ from farsiyab import jobs
 from farsiyab.adapters.base import SourceAdapter, SourceUnavailable
 from farsiyab.adapters.directories import DIRECTORIES, DirectoryAdapter
 from farsiyab.adapters.government import (
+    AcncAdapter,
     CraAdapter,
     IrsAdapter,
     LosAngelesAdapter,
+    SireneAdapter,
     TorontoAdapter,
+    UkCharityAdapter,
     VancouverAdapter,
 )
 from farsiyab.adapters.osm import OsmAdapter
@@ -59,6 +62,9 @@ ADAPTERS: dict[str, AdapterFactory] = {
     "gov:toronto_business": lambda release: TorontoAdapter(_geocoder()),
     "gov:irs_eo_bmf": lambda release: IrsAdapter(load_regions(), _geocoder()),
     "gov:cra_charities": lambda release: CraAdapter(load_regions(), _geocoder()),
+    "gov:uk_charities": lambda release: UkCharityAdapter(load_regions(), _geocoder()),
+    "gov:acnc_charities": lambda release: AcncAdapter(load_regions(), _geocoder()),
+    "gov:fr_sirene": lambda release: SireneAdapter(load_regions()),
     **{
         directory_id: (lambda release, d=directory: DirectoryAdapter(d()))
         for directory_id, directory in DIRECTORIES.items()

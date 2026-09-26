@@ -25,7 +25,7 @@ TEST_DATABASE_URL = os.environ.get(
 MUTABLE_TABLES = (
     "evidence", "source_record", "business_link", "business_category", "report",
     "business", "index_status", "job", "quota_usage", "do_not_index", "geocode_cache",
-    "submission", "label",
+    "submission", "label", "claim",
 )
 
 

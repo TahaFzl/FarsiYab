@@ -14,9 +14,9 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from farsiyab.config import get_settings
 from farsiyab.detection.detector import confidence_label, score
 from farsiyab.detection.signals import Signal
+from farsiyab.display import is_shown
 from farsiyab.models import Business, Evidence, Label
 
 LEVELS = ("high", "medium", "low")
@@ -37,9 +37,8 @@ def next_to_label(session: Session, city_id: int | None = None) -> uuid.UUID | N
         stmt = (
             select(Business.id)
             .where(
-                Business.status == "active",
+                is_shown(),
                 Business.confidence_label == level,
-                Business.confidence_score >= get_settings().min_display_score,
                 ~select(Label.business_id).where(Label.business_id == Business.id).exists(),
             )
             .order_by(func.random())

@@ -35,9 +35,10 @@ def test_due_cities(db):
 
 
 def test_schedule_queues_one_job_per_city(db):
-    for slug in ("toronto", "vancouver", "montreal", "los-angeles", "bay-area", "houston",
-                 "washington-dc", "hamburg", "berlin"):
-        indexed(db, slug, days_ago=1)
+    every_city = db.scalars(select(City.slug)).all()
+    for slug in every_city:
+        if slug != "frankfurt":
+            indexed(db, slug, days_ago=1)
     db.commit()
     first = schedule(db)
     again = schedule(db)

@@ -73,6 +73,7 @@ export interface Result {
   evidence: EvidenceItem[];
   links: { google_maps: string; apple_maps: string; openstreetmap?: string };
   last_verified_at: string;
+  owner_verified?: boolean;
 }
 
 export interface SearchResponse {
@@ -127,6 +128,10 @@ async function get<T>(path: string): Promise<T> {
 export const api = {
   countries: (lang: Locale) => get<Country[]>(`/api/v1/countries?lang=${lang}`),
   categories: (lang: Locale) => get<Category[]>(`/api/v1/categories?lang=${lang}`),
+  business: (lang: Locale, id: string) =>
+    get<Result & { city: { slug: string; country: string; name: string } }>(
+      `/api/v1/businesses/${encodeURIComponent(id)}?lang=${lang}`,
+    ),
   allCities: (lang: Locale) => get<CityInfo[]>(`/api/v1/cities?lang=${lang}`),
   cities: (country: string, lang: Locale) =>
     get<CityOption[]>(`/api/v1/countries/${encodeURIComponent(country)}/cities?lang=${lang}`),
@@ -150,6 +155,9 @@ export const browserApi = {
   jobStream: (jobId: string) => `/api/v1/search/jobs/${jobId}/stream`,
   report: (businessId: string) => `/api/v1/businesses/${businessId}/reports`,
   submissions: "/api/v1/submissions",
+  claims: (businessId: string) => `/api/v1/businesses/${businessId}/claims`,
+  verifyClaim: (claimId: string) => `/api/v1/claims/${claimId}/verify`,
+  owner: (claimId: string, lang: Locale) => `/api/v1/owner/${claimId}?lang=${lang}`,
   markers: (params: SearchParams) => {
     const query = new URLSearchParams({
       country: params.country,

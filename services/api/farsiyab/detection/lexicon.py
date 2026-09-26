@@ -7,10 +7,18 @@ from pathlib import Path
 
 from farsiyab.config import get_settings
 
+# One character in, one character out: detector matches on the normalized text and
+# cuts snippets from the original with the same offsets.
+_FOLD = str.maketrans({
+    "ي": "ی", "ك": "ک",  # Arabic yeh/kaf -> Persian, so Arabic "إيراني" matches "ایرانی"
+    "إ": "ا", "أ": "ا",  # hamza forms of alef (Arabic spelling)
+    "‌": " ",  # ZWNJ, so "فارسی‌زبان" == "فارسی زبان"
+    "İ": "i", "ı": "i",  # Turkish dotted/dotless i ("İranlı"); "İ".lower() is two characters
+})
+
 
 def _normalize_term(term: str) -> str:
-    # Persian yeh/kaf, and ZWNJ treated like a space so "فارسی‌زبان" == "فارسی زبان".
-    return term.replace("ي", "ی").replace("ك", "ک").replace("‌", " ").lower()
+    return "".join(c if len(low := c.lower()) != 1 else low for c in term.translate(_FOLD))
 
 
 def normalize_text(text: str) -> str:

@@ -129,3 +129,23 @@ def test_urdu_heh_goal_is_not_persian():
 
     assert script.classify("آئینہِ لفظ") == script.Script.OTHER
     assert script.classify("آئینه") != script.Script.OTHER
+
+
+@pytest.mark.parametrize("text", [
+    "Persisk restaurang Stockholm",  # Swedish
+    "Iranska Livs",
+    "Perzisch Restaurant Amsterdam",  # Dutch
+    "Iraanse supermarkt",
+    "İranlı Kuaför",  # Turkish, dotted capital I
+    "Farsça konuşan doktor",
+    "مطعم إيراني",  # Arabic spelling (Dubai)
+])
+def test_phase5_languages_are_explicit(text):
+    signals = detect([TextField("name", text, None)])
+    assert "explicit_keyword" in [s.signal for s in signals]
+
+
+def test_turkish_capital_i_keeps_snippet_offsets():
+    signal = next(s for s in detect([TextField("text", "Kadıköy'de İranlı aile restoranı", None)])
+                  if s.signal == "explicit_keyword")
+    assert "İranlı" in signal.snippet

@@ -9,16 +9,18 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 from urllib.parse import quote
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Select, exists, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from farsiyab import jobs, submissions
+from farsiyab import claims, jobs, submissions
 from farsiyab.config import get_settings
 from farsiyab.db import session_factory
 from farsiyab.detection.signals import label as signal_label
+from farsiyab.display import is_shown, threshold_for
+from farsiyab.links import phone_link
 from farsiyab.models import (
     REPORT_REASONS,
     Business,
@@ -26,6 +28,7 @@ from farsiyab.models import (
     BusinessLink,
     Category,
     City,
+    Claim,
     Country,
     Evidence,
     IndexStatus,
@@ -108,12 +111,11 @@ def all_cities(session: SessionDep, lang: Lang = "fa") -> list[dict[str, Any]]:
     """Every city with how many results each top-level category shows (subcategories
     included, as search counts them). Used by the city pages and the sitemap."""
     parents = {c.slug: c.parent_slug or c.slug for c in session.scalars(select(Category))}
-    min_score = get_settings().min_display_score
     counts: dict[int, dict[str, set[uuid.UUID]]] = defaultdict(lambda: defaultdict(set))
     for city_id, business_id, slug in session.execute(
         select(Business.city_id, Business.id, BusinessCategory.category_slug)
         .join(BusinessCategory, BusinessCategory.business_id == Business.id)
-        .where(Business.status == "active", Business.confidence_score >= min_score)
+        .where(is_shown())
     ):
         counts[city_id][parents.get(slug, slug)].add(business_id)
     statuses = {s.city_id: s for s in session.scalars(select(IndexStatus))}
@@ -255,6 +257,7 @@ def _serialize(session: Session, businesses: list[Any], lang: Lang) -> list[dict
                 "evidence": evidence[b.id],
                 "links": _map_links(name, b.address, b.lat, b.lng),
                 "last_verified_at": b.last_verified_at.isoformat(),
+                "owner_verified": b.owner_verified_at is not None,
             }
         )
     return results
@@ -275,6 +278,7 @@ def _base_query(city_id: int | None, min_score: float | None) -> Select:
         Business.confidence_score,
         Business.confidence_label,
         Business.last_verified_at,
+        Business.owner_verified_at,
         lat,
         lng,
     )
@@ -303,7 +307,7 @@ def _search_query(
         raise HTTPException(404, f"unknown city: {country}/{city}")
     slugs = _expand_categories(session, [s.strip() for s in categories.split(",") if s.strip()])
 
-    min_score = max(MIN_SCORE[min_confidence], get_settings().min_display_score)
+    min_score = max(MIN_SCORE[min_confidence], threshold_for(session, city_row))
     stmt = _base_query(city_row.id, min_score).where(
         exists().where(
             BusinessCategory.business_id == Business.id,
@@ -567,6 +571,118 @@ def submit_business(session: SessionDep, body: SubmissionIn, request: Request) -
     session.add(submission)
     session.commit()
     return {"id": str(submission.id), "status": submission.status}
+
+
+@app.get("/api/v1/businesses/{business_id}")
+def get_business(session: SessionDep, business_id: uuid.UUID, lang: Lang = "fa") -> dict:
+    """One shown business, as a search result card (the claim page uses it)."""
+    business = session.get(Business, business_id)
+    if business is None:
+        raise HTTPException(404, "business not found")
+    city = session.get(City, business.city_id)
+    if business.status != "active" or business.confidence_score < threshold_for(session, city):
+        raise HTTPException(404, "business not found")
+    rows = session.execute(_base_query(None, None).where(Business.id == business_id)).all()
+    card = _serialize(session, rows, lang)[0]
+    card["city"] = {"slug": city.slug, "country": city.country_code, "name": _name(city, lang)}
+    return card
+
+
+# ── Owner claims (docs/sources/user-submissions.md, "ادعای مالکیت") ─────────────
+
+CLAIMS_PER_DAY = 5
+
+
+class ClaimIn(BaseModel):
+    method: Literal["website", "telegram", "manual"]
+    contact_email: EmailStr | None = None
+    note: str | None = Field(default=None, max_length=2000)
+
+
+@app.post("/api/v1/businesses/{business_id}/claims", status_code=201)
+def start_claim(
+    session: SessionDep, business_id: uuid.UUID, body: ClaimIn, request: Request
+) -> dict[str, Any]:
+    business = session.get(Business, business_id)
+    if business is None or business.status == "removed_by_request":
+        raise HTTPException(404, "business not found")
+    if body.method == "manual" and not body.contact_email:
+        raise HTTPException(422, "manual verification needs a contact email")
+    hashed = submissions.client_hash(request.client.host if request.client else None)
+    if hashed and session.scalar(
+        select(func.count()).where(Claim.client_hash == hashed)
+    ) >= CLAIMS_PER_DAY:
+        raise HTTPException(429, "too many claims today")
+    try:
+        claim, proof = claims.start_claim(session, business, body.method, body.contact_email,
+                                          body.note, hashed)
+    except claims.ClaimError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    session.commit()
+    return {"id": str(claim.id), "token": claim.token, "method": claim.method,
+            "where": proof.where}
+
+
+@app.post("/api/v1/claims/{claim_id}/verify")
+def verify_claim(session: SessionDep, claim_id: uuid.UUID) -> dict[str, str]:
+    claim = session.get(Claim, claim_id)
+    if claim is None:
+        raise HTTPException(404, "claim not found")
+    try:
+        key = claims.verify(session, claim)
+    except claims.ClaimError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    session.commit()
+    # Shown once. Only its hash is stored.
+    return {"owner_key": key}
+
+
+def _owned(session: Session, claim_id: uuid.UUID, key: str | None) -> tuple[Claim, Business]:
+    try:
+        claim = claims.owner_claim(session, claim_id, key or "")
+    except claims.ClaimError as exc:
+        raise HTTPException(403, str(exc)) from exc
+    return claim, session.get(Business, claim.business_id)
+
+
+@app.get("/api/v1/owner/{claim_id}")
+def owner_view(
+    session: SessionDep, claim_id: uuid.UUID,
+    x_owner_key: Annotated[str | None, Header()] = None, lang: Lang = "fa",
+) -> dict[str, Any]:
+    _, business = _owned(session, claim_id, x_owner_key)
+    rows = session.execute(_base_query(None, None).where(Business.id == business.id)).all()
+    return {"business": _serialize(session, rows, lang)[0], "status": business.status}
+
+
+class OwnerEditIn(BaseModel):
+    name_fa: str | None = Field(default=None, max_length=200)
+    name_latin: str | None = Field(default=None, max_length=200)
+    address: str | None = Field(default=None, max_length=300)
+    phone: str | None = Field(default=None, max_length=40)
+    website: str | None = Field(default=None, max_length=300)
+    status: Literal["active", "closed", "hidden"] | None = None
+
+
+@app.patch("/api/v1/owner/{claim_id}")
+def owner_edit(
+    session: SessionDep, claim_id: uuid.UUID, body: OwnerEditIn,
+    x_owner_key: Annotated[str | None, Header()] = None,
+) -> dict[str, str]:
+    _, business = _owned(session, claim_id, x_owner_key)
+    changes = body.model_dump()
+    if changes.get("phone"):
+        city = session.get(City, business.city_id)
+        phone = phone_link(changes["phone"], city.country_code)
+        if phone is None:
+            raise HTTPException(422, "not a phone number")
+        changes["phone"] = phone.value
+    try:
+        claims.apply_owner_edit(session, business, changes)
+    except claims.ClaimError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    session.commit()
+    return {"status": business.status}
 
 
 # Imported last: the admin routes reuse the helpers above.

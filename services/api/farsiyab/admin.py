@@ -14,13 +14,14 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from farsiyab import evaluation, jobs, submissions
+from farsiyab import claims, evaluation, jobs, submissions
 from farsiyab.api import SessionDep, _base_query, _name, _serialize
 from farsiyab.config import get_settings
 from farsiyab.models import (
     Business,
     Category,
     City,
+    Claim,
     IndexStatus,
     Job,
     Label,
@@ -91,6 +92,7 @@ def overview(session: SessionDep, lang: Lang = "fa") -> dict[str, Any]:
         })
     return {
         "pending_submissions": count(select(Submission).where(Submission.status == "pending")),
+        "pending_claims": count(select(Claim).where(Claim.status == "pending")),
         "open_reports": count(select(Report).where(Report.status == "open")),
         "hidden_businesses": count(select(Business).where(Business.status == "hidden")),
         "labels": count(select(Label)),
@@ -364,3 +366,56 @@ def recent_jobs(session: SessionDep, days: int = 7) -> list[dict[str, Any]]:
             select(Job).where(Job.created_at >= since).order_by(Job.created_at.desc()).limit(50)
         )
     ]
+
+
+# ── Owner claims ──────────────────────────────────────────────────────────────
+
+
+@router.get("/claims")
+def list_claims(
+    session: SessionDep, status: Literal["pending", "verified", "rejected"] = "pending",
+    lang: Lang = "fa",
+) -> list[dict[str, Any]]:
+    rows = session.scalars(
+        select(Claim).where(Claim.status == status).order_by(Claim.created_at)
+    ).all()
+    return [
+        {
+            "id": str(c.id),
+            "method": c.method,
+            "token": c.token,
+            "contact_email": c.contact_email,
+            "note": c.note,
+            "status": c.status,
+            "created_at": c.created_at.isoformat(),
+            "business": _business(session, c.business_id, lang),
+        }
+        for c in rows
+    ]
+
+
+def _pending_claim(session: Session, claim_id: uuid.UUID) -> Claim:
+    claim = session.get(Claim, claim_id)
+    if claim is None:
+        raise HTTPException(404, "claim not found")
+    if claim.status != "pending":
+        raise HTTPException(409, f"claim already {claim.status}")
+    return claim
+
+
+@router.post("/claims/{claim_id}/verify")
+def verify_claim(session: SessionDep, claim_id: uuid.UUID) -> dict[str, str]:
+    """For claims checked by hand (e.g. a call to the business's public number). The
+    key is returned once, for the admin to send to the owner's contact email."""
+    claim = _pending_claim(session, claim_id)
+    key = claims.grant(claim)
+    session.get(Business, claim.business_id).owner_verified_at = claim.verified_at
+    session.commit()
+    return {"owner_key": key, "contact_email": claim.contact_email or ""}
+
+
+@router.post("/claims/{claim_id}/reject")
+def reject_claim(session: SessionDep, claim_id: uuid.UUID) -> dict[str, str]:
+    _pending_claim(session, claim_id).status = "rejected"
+    session.commit()
+    return {"status": "rejected"}

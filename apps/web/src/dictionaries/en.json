@@ -94,7 +94,19 @@
   "sources": {
     "overture": "Overture Maps",
     "osm": "OpenStreetMap",
-    "website": "Business websites"
+    "website": "Business websites",
+    "gov:uk_charities": "UK Charity Commission",
+    "gov:acnc_charities": "Australian charities register",
+    "wikidata": "Wikidata",
+    "wikivoyage": "Wikivoyage",
+    "gov:la_business": "LA business licences",
+    "gov:vancouver_business": "Vancouver business licences",
+    "gov:toronto_business": "Toronto business licences",
+    "gov:irs_eo_bmf": "US nonprofits (IRS)",
+    "gov:cra_charities": "Canadian charities (CRA)",
+    "directory:bazaarche": "Bazaarche",
+    "directory:iranianbusinesscenter": "Iranian Business Center",
+    "gov:fr_sirene": "French company register (SIRENE)"
   },
   "submit": {
     "title": "Add a business",
@@ -144,7 +156,8 @@
       "reports": "Reports",
       "labels": "Labeling",
       "sources": "Sources",
-      "logout": "Sign out"
+      "logout": "Sign out",
+      "claims": "Claims"
     },
     "overview": {
       "pending": "Pending submissions",
@@ -237,6 +250,16 @@
       "running": "running",
       "done": "done",
       "failed": "failed"
+    },
+    "claims": {
+      "none": "No pending claims.",
+      "method": "Method",
+      "token": "Code",
+      "verify": "Verify and create link",
+      "reject": "Reject",
+      "sendLink": "Send this link to the owner (shown only once):",
+      "manualHint": "Verify manual claims only after calling the business's public number or another reliable check. Website and Telegram claims are verified by the owners themselves.",
+      "failed": "That did not work."
     }
   },
   "map": {
@@ -258,5 +281,48 @@
     "cities": "Cities",
     "browseCities": "Browse by city",
     "empty": "No results in this category yet."
+  },
+  "claim": {
+    "cardLink": "Own this business?",
+    "ownerBadge": "Details confirmed by the owner",
+    "title": "Manage your business",
+    "intro": "If you own this business you can correct its address, phone and website, or mark it closed, without creating an account. First show us that the business is yours.",
+    "method": "How to verify",
+    "methods": {
+      "website": "Put a code on the business's website",
+      "telegram": "Put a code in the business's Telegram channel description",
+      "manual": "Checked by us by hand (e.g. a call to the business's public number)"
+    },
+    "email": "Your email",
+    "emailHint": "Only for this request; required for manual checks.",
+    "note": "Note (optional)",
+    "start": "Continue",
+    "failed": "That did not work. Please try again.",
+    "tooMany": "You have reached today's limit.",
+    "noLink": "We have no such link for this business. Please choose another method.",
+    "putToken": "Put this code on {where} (anywhere on the page, e.g. the footer or description), then press the button below. You can remove it after verification:",
+    "check": "Check now",
+    "checking": "Checking…",
+    "notFound": "The code was not found yet. Make sure the page is saved and published.",
+    "manualWait": "Your request is saved. After we check it, the management link is sent to your email. Reference:",
+    "verified": "Verified! This is your private link and it is shown only once. Save it: anyone with this link can change the business's details:",
+    "openOwner": "Open the management page",
+    "ownerTitle": "Manage business details",
+    "ownerIntro": "Fill in only the fields you want to change.",
+    "nameFa": "Persian name",
+    "nameLatin": "Latin name",
+    "address": "Address",
+    "phone": "Phone",
+    "website": "Website",
+    "status": "Status",
+    "statuses": {
+      "active": "Open and listed",
+      "closed": "Closed",
+      "hidden": "Do not list on FarsiYab"
+    },
+    "save": "Save",
+    "saved": "Saved.",
+    "badKey": "This link is not valid or its key is incomplete.",
+    "invalid": "Some values are not valid."
   }
 }

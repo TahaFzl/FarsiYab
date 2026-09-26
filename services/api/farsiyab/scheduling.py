@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from farsiyab import jobs
 from farsiyab.config import Settings, get_settings
+from farsiyab.display import is_shown
 from farsiyab.models import Business, BusinessLink, City, IndexStatus, SourceRecord
 
 SOCIAL_KINDS = ("facebook", "instagram", "telegram")
@@ -65,12 +66,10 @@ def schedule(session: Session, latest_overture_release: str | None = None) -> li
 def coverage(session: Session, min_score: float | None = None) -> list[dict[str, Any]]:
     """Per city: shown businesses, how many each source contributed, and how many
     are backed by at least two independent sources (docs/08-roadmap.md, phase 3)."""
-    min_score = get_settings().min_display_score if min_score is None else min_score
-    shown = (
-        select(Business.id, Business.city_id)
-        .where(Business.status == "active", Business.confidence_score >= min_score)
-        .subquery()
+    visible = is_shown() if min_score is None else (
+        (Business.status == "active") & (Business.confidence_score >= min_score)
     )
+    shown = select(Business.id, Business.city_id).where(visible).subquery()
     per_source: dict[int, dict[str, int]] = defaultdict(dict)
     independent: dict[int, set[str]] = defaultdict(set)
     for city_id, source_id, count in session.execute(

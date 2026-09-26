@@ -146,3 +146,32 @@ def test_report_validation(client, toronto_data):
                                   "contact_email": "not-an-email"}).status_code == 422
     assert client.post(url, json={"reason": "remove_request",
                                   "contact_email": "owner@example.com"}).status_code == 201
+
+
+def test_markers_follow_the_search_filters(client, toronto_data):
+    params = {"country": "CA", "city": "toronto", "categories": "restaurant,grocery"}
+    body = client.get("/api/v1/search/markers", params=params).json()
+    assert body["bbox"] == [-79.7, 43.55, -79.1, 43.95]
+    assert [m["name"]["latin"] for m in body["markers"]] == ["Shiraz Kitchen", "Tehran Market"]
+    assert body["markers"][0] == {
+        "id": body["markers"][0]["id"], "name": {"fa": "آشپزخانه شیراز", "latin": "Shiraz Kitchen"},
+        "label": "high", "lat": 43.7, "lng": -79.4,
+    }
+    high = client.get("/api/v1/search/markers", params={**params, "min_confidence": "high"})
+    assert len(high.json()["markers"]) == 1
+    assert client.get("/api/v1/search/markers",
+                      params={**params, "city": "atlantis"}).status_code == 404
+
+
+def test_all_cities_count_shown_results_per_top_level_category(client, toronto_data, db):
+    store_listing(db, toronto_data, listing(source="osm", external_id="d", lat=43.5,
+                                            name="Farsi Speaking Dentist Toronto",
+                                            category="doctor/dentist"))
+    recompute_scores(db, toronto_data.id)
+    db.commit()
+    cities = {c["slug"]: c for c in client.get("/api/v1/cities").json()}
+    assert len(cities) == 10
+    # The weak "Dr. Karimzadeh Dental" is not shown, so it is not counted.
+    assert cities["toronto"]["category_counts"] == {"restaurant": 1, "grocery": 1, "doctor": 1}
+    assert cities["toronto"]["country"] == "CA" and cities["toronto"]["last_indexed_at"]
+    assert cities["berlin"]["category_counts"] == {}

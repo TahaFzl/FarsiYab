@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getDictionary } from "@/lib/dictionaries";
 import { direction, hasLocale, locales } from "@/lib/i18n";
+import { siteUrl } from "@/lib/site";
 
 import "../globals.css";
 
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     title: { default: `${dict.site.name} | ${dict.site.tagline}`, template: `%s | ${dict.site.name}` },
     description: dict.site.description,
     alternates: { languages: { fa: "/fa", en: "/en" } },
+    metadataBase: new URL(siteUrl()),
   };
 }
 

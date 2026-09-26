@@ -103,6 +103,36 @@ def cities(
     ]
 
 
+@app.get("/api/v1/cities")
+def all_cities(session: SessionDep, lang: Lang = "fa") -> list[dict[str, Any]]:
+    """Every city with how many results each top-level category shows (subcategories
+    included, as search counts them). Used by the city pages and the sitemap."""
+    parents = {c.slug: c.parent_slug or c.slug for c in session.scalars(select(Category))}
+    min_score = get_settings().min_display_score
+    counts: dict[int, dict[str, set[uuid.UUID]]] = defaultdict(lambda: defaultdict(set))
+    for city_id, business_id, slug in session.execute(
+        select(Business.city_id, Business.id, BusinessCategory.category_slug)
+        .join(BusinessCategory, BusinessCategory.business_id == Business.id)
+        .where(Business.status == "active", Business.confidence_score >= min_score)
+    ):
+        counts[city_id][parents.get(slug, slug)].add(business_id)
+    statuses = {s.city_id: s for s in session.scalars(select(IndexStatus))}
+    out = []
+    enabled = select(City).where(City.enabled).order_by(City.country_code, City.name_en)
+    for c in session.scalars(enabled):
+        status = statuses.get(c.id)
+        out.append({
+            "slug": c.slug,
+            "country": c.country_code,
+            "name": _name(c, lang),
+            "name_en": c.name_en,
+            "last_indexed_at": status.last_indexed_at.isoformat()
+            if status and status.last_indexed_at else None,
+            "category_counts": {slug: len(ids) for slug, ids in counts[c.id].items()},
+        })
+    return out
+
+
 @app.get("/api/v1/categories")
 def categories(session: SessionDep, lang: Lang = "fa") -> list[dict[str, Any]]:
     rows = list(session.scalars(select(Category).order_by(Category.position)))
@@ -257,21 +287,15 @@ def _base_query(city_id: int | None, min_score: float | None) -> Select:
     )
 
 
-@app.get("/api/v1/search")
-def search(
-    session: SessionDep,
+def _search_query(
+    session: Session,
     country: str,
     city: str,
-    categories: Annotated[str, Query(description="comma-separated category slugs")],
-    min_confidence: Literal["low", "medium", "high"] = "low",
-    sources: str | None = None,
-    sort: Literal["confidence", "name", "distance"] = "confidence",
-    lat: float | None = None,
-    lng: float | None = None,
-    page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
-    lang: Lang = "fa",
-) -> dict[str, Any]:
+    categories: str,
+    min_confidence: str,
+    sources: str | None,
+) -> tuple[City, list[str], Select]:
+    """The city, the expanded categories and the filtered query shared by search and markers."""
     city_row = session.scalar(
         select(City).where(City.slug == city, City.country_code == country.upper())
     )
@@ -294,7 +318,62 @@ def search(
             )
             | exists().where(BusinessLink.business_id == Business.id, BusinessLink.kind.in_(wanted))
         )
+    return city_row, slugs, stmt
 
+
+MAX_MARKERS = 1000
+
+
+@app.get("/api/v1/search/markers")
+def search_markers(
+    session: SessionDep,
+    country: str,
+    city: str,
+    categories: Annotated[str, Query(description="comma-separated category slugs")],
+    min_confidence: Literal["low", "medium", "high"] = "low",
+    sources: str | None = None,
+) -> dict[str, Any]:
+    """Every located result of a search, for the map (names and positions only)."""
+    city_row, _, stmt = _search_query(session, country, city, categories, min_confidence, sources)
+    rows = session.execute(
+        stmt.where(Business.location.is_not(None))
+        .order_by(Business.confidence_score.desc())
+        .limit(MAX_MARKERS)
+    ).all()
+    return {
+        # [west, south, east, north], so the map can frame the city when nothing is found.
+        "bbox": [city_row.west, city_row.south, city_row.east, city_row.north],
+        "markers": [
+            {
+                "id": str(r.id),
+                "name": {"fa": r.name_fa, "latin": r.name_latin},
+                "label": r.confidence_label,
+                "lat": round(r.lat, 6),
+                "lng": round(r.lng, 6),
+            }
+            for r in rows
+        ],
+    }
+
+
+@app.get("/api/v1/search")
+def search(
+    session: SessionDep,
+    country: str,
+    city: str,
+    categories: Annotated[str, Query(description="comma-separated category slugs")],
+    min_confidence: Literal["low", "medium", "high"] = "low",
+    sources: str | None = None,
+    sort: Literal["confidence", "name", "distance"] = "confidence",
+    lat: float | None = None,
+    lng: float | None = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+    lang: Lang = "fa",
+) -> dict[str, Any]:
+    city_row, slugs, stmt = _search_query(
+        session, country, city, categories, min_confidence, sources
+    )
     total = session.scalar(select(func.count()).select_from(stmt.subquery()))
     name_order = func.coalesce(Business.name_latin, Business.name_fa)
     if sort == "distance":

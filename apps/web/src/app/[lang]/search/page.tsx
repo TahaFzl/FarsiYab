@@ -5,10 +5,12 @@ import { notFound, redirect } from "next/navigation";
 import { ErrorNotice } from "@/components/ErrorNotice";
 import { LiveSearch } from "@/components/LiveSearch";
 import { ResultCard } from "@/components/ResultCard";
+import { ResultsMap } from "@/components/ResultsMap";
 import { SearchForm } from "@/components/SearchForm";
 import {
   api,
   ApiError,
+  browserApi,
   flattenCategories,
   searchHref,
   type Category,
@@ -114,12 +116,14 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
 
       <Filters lang={lang} dict={dict} query={query} link={link} />
 
+      {data.total > 0 && <ResultsMap markersUrl={browserApi.markers(query)} lang={lang} text={dict.map} />}
+
       {data.results.length === 0 ? (
         <EmptyState lang={lang} dict={dict} requested={requested} city={data.city.name} />
       ) : (
         <ol className="space-y-4">
           {data.results.map((r) => (
-            <li key={r.id}>
+            <li key={r.id} id={`b-${r.id}`} className="scroll-mt-4">
               <ResultCard result={r} lang={lang} dict={dict} categoryNames={categoryNames} />
             </li>
           ))}

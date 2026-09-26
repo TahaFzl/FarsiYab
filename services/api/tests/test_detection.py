@@ -121,3 +121,11 @@ def test_score_is_noisy_or_and_negatives_damp_once():
 )
 def test_confidence_labels(value, label):
     assert confidence_label(value) == label
+
+
+def test_urdu_heh_goal_is_not_persian():
+    # Phase 4 labeling: "آئینہِ لفظ" (Urdu) was counted as a Persian-script name.
+    from farsiyab.detection import script
+
+    assert script.classify("آئینہِ لفظ") == script.Script.OTHER
+    assert script.classify("آئینه") != script.Script.OTHER

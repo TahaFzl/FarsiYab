@@ -238,5 +238,25 @@
       "done": "done",
       "failed": "failed"
     }
+  },
+  "map": {
+    "show": "Show on map",
+    "hide": "Hide map",
+    "loading": "Loading the map…",
+    "failed": "The map could not be loaded.",
+    "none": "None of these results has a known location.",
+    "count": "{count} results on the map (results without a location are not shown)"
+  },
+  "seo": {
+    "cityTitle": "Iranian and Persian-speaking businesses in {city}",
+    "cityIntro": "Restaurants, doctors, lawyers, shops and other businesses in {city} that FarsiYab found in public sources. Every result shows its source and why it is listed as Iranian.",
+    "categoryTitle": "Iranian {category} in {city}",
+    "categoryDescription": "{count} Iranian and Persian-speaking {category} in {city}, with the source and evidence for each result.",
+    "browse": "Categories",
+    "results": "{count} results",
+    "seeAll": "Search and filter all results",
+    "cities": "Cities",
+    "browseCities": "Browse by city",
+    "empty": "No results in this category yet."
   }
 }

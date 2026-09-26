@@ -71,6 +71,14 @@ test("official registries are linked for the city and category", async ({ page }
   await expect(box.getByRole("link", { name: /CPSO/ })).toHaveAttribute("href", /cpso\.on\.ca/);
 });
 
+test("results can be shown on a map", async ({ page }) => {
+  await page.goto("/fa/search?country=CA&city=toronto&categories=restaurant");
+  await page.getByRole("button", { name: "نمایش روی نقشه" }).click();
+  const map = page.getByRole("region", { name: "نمایش روی نقشه" });
+  await expect(map.locator(".leaflet-interactive").first()).toBeVisible();
+  await expect(page.getByText(/نتیجه روی نقشه/)).toBeVisible();
+});
+
 test("static pages render", async ({ page }) => {
   for (const [path, heading] of [
     ["/fa/how-it-works", "فارسی‌یاب چطور کار می‌کند؟"],

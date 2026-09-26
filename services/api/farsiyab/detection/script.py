@@ -21,7 +21,7 @@ PERSIAN_LIKELY = {"ی", "ک", "‌"}
 # Arabic-only forms.
 ARABIC_ONLY = {"ي", "ك", "ة", "ى"}  # ي ك ة ى
 PASHTO_ONLY = set("ټډړږښګڼېۍځڅ")
-URDU_ONLY = set("ٹڈڑںےھۓ")
+URDU_ONLY = set("ٹڈڑںےھۓہۂۃ")  # ہ (heh goal) is Urdu; Persian uses ه
 SORANI_ONLY = set("ڵڕۆێەڤ")
 
 SHORT_TEXT_CHARS = 15

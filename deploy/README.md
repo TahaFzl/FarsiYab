@@ -43,6 +43,17 @@ sudo nano /etc/farsiyab/farsiyab.env      # رمز دیتابیس و دامنه
 sudo chown root:farsiyab /etc/farsiyab/farsiyab.env && sudo chmod 640 /etc/farsiyab/farsiyab.env
 ```
 
+مقادیری که باید حتماً عوض شوند:
+
+| متغیر | توضیح |
+|---|---|
+| `FARSIYAB_DATABASE_URL` | رمز دیتابیس |
+| `FARSIYAB_BOT_URL` | آدرس سایت؛ در User-Agent ربات فرستاده می‌شود |
+| `FARSIYAB_SITE_URL` | آدرس عمومی سایت (مثلاً `https://farsiyab.example.com`) برای لینک‌های canonical، `sitemap.xml` و `robots.txt`. **موقع `npm run build` هم باید تنظیم باشد**، چون `robots.txt` در زمان build ساخته می‌شود |
+| `FARSIYAB_ADMIN_TOKEN` | توکن پنل مدیریت (`/fa/admin`). با `openssl rand -hex 32` بسازید. اگر خالی باشد، پنل خاموش است |
+| `FARSIYAB_SECRET_KEY` | کلید hash برای سقف روزانه‌ی فرم ثبت کسب‌وکار؛ مثل بالا بسازید |
+| `NEXT_PUBLIC_MAP_TILES` (اختیاری) | آدرس tile های نقشه. پیش‌فرض tile های خود OpenStreetMap است که فقط برای ترافیک کم مجاز است ([سیاست استفاده](https://operations.osmfoundation.org/policies/tiles/)). با ترافیک زیاد، یک سرویس tile دیگر تنظیم کنید. این مقدار هم در زمان build خوانده می‌شود |
+
 ## ۵. نصب و ساخت
 
 ```bash

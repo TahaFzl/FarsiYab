@@ -22,6 +22,16 @@ export interface CityOption {
   name_en: string;
 }
 
+export interface CityInfo {
+  slug: string;
+  country: string;
+  name: string;
+  name_en: string;
+  last_indexed_at: string | null;
+  /** Shown results per top-level category (subcategories included). */
+  category_counts: Record<string, number>;
+}
+
 export interface Category {
   slug: string;
   name: string;
@@ -117,6 +127,7 @@ async function get<T>(path: string): Promise<T> {
 export const api = {
   countries: (lang: Locale) => get<Country[]>(`/api/v1/countries?lang=${lang}`),
   categories: (lang: Locale) => get<Category[]>(`/api/v1/categories?lang=${lang}`),
+  allCities: (lang: Locale) => get<CityInfo[]>(`/api/v1/cities?lang=${lang}`),
   cities: (country: string, lang: Locale) =>
     get<CityOption[]>(`/api/v1/countries/${encodeURIComponent(country)}/cities?lang=${lang}`),
   search: (lang: Locale, params: SearchParams) => {
@@ -139,6 +150,15 @@ export const browserApi = {
   jobStream: (jobId: string) => `/api/v1/search/jobs/${jobId}/stream`,
   report: (businessId: string) => `/api/v1/businesses/${businessId}/reports`,
   submissions: "/api/v1/submissions",
+  markers: (params: SearchParams) => {
+    const query = new URLSearchParams({
+      country: params.country,
+      city: params.city,
+      categories: params.categories.join(","),
+      min_confidence: params.min_confidence ?? "low",
+    });
+    return `/api/v1/search/markers?${query}`;
+  },
 };
 
 export type CategoryOption = { slug: string; name: string };

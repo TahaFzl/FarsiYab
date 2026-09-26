@@ -74,3 +74,10 @@ tinyurl.com
 calendly.com
 bazaarche.ca
 iranianbusinesscenter.com
+# Webmail (phase 4 labeling: a dental lab's "website" was gmail.com).
+gmail.com
+googlemail.com
+yahoo.com
+hotmail.com
+outlook.com
+icloud.com

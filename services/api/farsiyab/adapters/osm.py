@@ -40,7 +40,6 @@ def build_query(bbox: tuple[float, float, float, float], timeout: int = 180) -> 
 )->.pois;
 (
   nwr.pois["cuisine"~"persian|iranian",i];
-  nwr.pois["name:fa"];
   nwr.pois["language:fa"="yes"];
   nwr.pois["name"~"[پچژگ]"];
   nwr.pois["name"~"{NAME_HINTS}",i];
@@ -66,9 +65,15 @@ def element_to_listing(element: dict[str, Any], mapper: CategoryMapper) -> RawLi
     lat = element.get("lat", (element.get("center") or {}).get("lat"))
     lng = element.get("lon", (element.get("center") or {}).get("lon"))
 
+    # name:fa is left out on purpose: mappers add Persian translations to parks, chain
+    # stores and universities, so it says nothing about who runs the place (phase 4
+    # labeling: 24 of 40 false positives). It is still shown as the Persian name.
     texts = [TextField("name", n, url) for n in dict.fromkeys(
-        tags.get(k) for k in ("name", "name:fa", "name:en", "alt_name", "brand") if tags.get(k)
+        tags.get(k) for k in ("name", "name:en", "alt_name", "brand") if tags.get(k)
     )]
+    persian = tags.get("name:fa")
+    if persian and persian != name:
+        name = f"{name} | {persian}"
     if tags.get("description"):
         texts.append(TextField("text", tags["description"], url))
 

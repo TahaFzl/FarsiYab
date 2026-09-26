@@ -31,6 +31,12 @@ npm run build && npm start &    # or npm run dev
 npm run e2e                     # E2E_SCREENSHOTS=/some/dir to save screenshots
 ```
 
+The admin tests (`e2e/admin.spec.ts`) run only when the API was started with
+`FARSIYAB_ADMIN_TOKEN` and the same value is in `E2E_ADMIN_TOKEN`; otherwise they
+are skipped. They reject the submission they create, so no business is left behind.
+The submission form allows 5 submissions a day per address, so start the API with
+`FARSIYAB_SUBMISSIONS_PER_DAY=1000` when running the tests repeatedly.
+
 ## Structure
 
 | Path | What |

@@ -12,6 +12,7 @@ from farsiyab.adapters.osm import OsmAdapter, build_query, element_to_listing
 from farsiyab.adapters.overture import OvertureAdapter, latest_release, row_to_listing
 from farsiyab.adapters.website import WebsiteChecker, analyse_html
 from farsiyab.config import Settings
+from farsiyab.detection.detector import detect, has_positive
 from farsiyab.reference import CityInfo, default_mapper
 
 TORONTO = CityInfo(
@@ -141,6 +142,18 @@ class TestOsm:
         assert [s.signal for s in doctor.signals] == ["osm_language_fa"]
 
         assert element_to_listing(OVERPASS_RESPONSE["elements"][2], default_mapper()) is None
+
+    def test_name_fa_is_a_display_name_not_evidence(self):
+        # Labeled false positives: "Finley Park" / پارک فینلی, "PENNY" / پنی.
+        park = element_to_listing(
+            {"type": "node", "id": 9, "lat": 43.7, "lon": -79.4,
+             "tags": {"leisure": "park", "amenity": "park", "name": "Finley Park",
+                      "name:fa": "پارک فینلی"}},
+            default_mapper(),
+        )
+        assert park.name == "Finley Park | پارک فینلی"
+        assert "پارک فینلی" not in [t.text for t in park.texts]
+        assert not has_positive(detect(park.texts, park.signals))
 
     def test_fetch_through_http(self):
         def handler(request: httpx.Request) -> httpx.Response:

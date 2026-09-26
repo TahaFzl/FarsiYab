@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     website_min_interval_seconds: float = 1.0
     website_max_bytes: int = 2_000_000
 
+    # Admin API (docs/05-api.md): a long random token; empty turns the admin API off.
+    admin_token: str = ""
+    # Salts the hashed client address used to rate-limit the public submission form.
+    secret_key: str = "change-me"
+    submissions_per_day: int = 5
+
     @property
     def user_agent(self) -> str:
         return f"FarsiYabBot/0.1 (+{self.bot_url})"

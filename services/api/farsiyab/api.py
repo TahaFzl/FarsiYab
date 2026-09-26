@@ -9,13 +9,13 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 from urllib.parse import quote
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Select, exists, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from farsiyab import jobs
+from farsiyab import jobs, submissions
 from farsiyab.config import get_settings
 from farsiyab.db import session_factory
 from farsiyab.detection.signals import label as signal_label
@@ -33,6 +33,7 @@ from farsiyab.models import (
     Report,
     Source,
     SourceRecord,
+    Submission,
 )
 from farsiyab.reference import load_regions, registry_links_for
 
@@ -229,10 +230,12 @@ def _serialize(session: Session, businesses: list[Any], lang: Lang) -> list[dict
     return results
 
 
-def _base_query(city_id: int, min_score: float) -> Select:
+def _base_query(city_id: int | None, min_score: float | None) -> Select:
+    """Shown businesses of a city; with `city_id=None` any business, whatever its status
+    or score (the admin API)."""
     lat = func.ST_Y(func.geometry(Business.location)).label("lat")
     lng = func.ST_X(func.geometry(Business.location)).label("lng")
-    return select(
+    stmt = select(
         Business.id,
         Business.name_fa,
         Business.name_latin,
@@ -244,10 +247,13 @@ def _base_query(city_id: int, min_score: float) -> Select:
         Business.last_verified_at,
         lat,
         lng,
-    ).where(
+    )
+    if city_id is None:
+        return stmt
+    return stmt.where(
         Business.city_id == city_id,
         Business.status == "active",
-        Business.confidence_score >= min_score,
+        Business.confidence_score >= (min_score or 0.0),
     )
 
 
@@ -430,3 +436,61 @@ def report_business(
             business.status = "hidden"
     session.commit()
     return {"id": str(report.id)}
+
+
+class SubmissionIn(BaseModel):
+    country: str = Field(min_length=2, max_length=2)
+    city: str
+    name: str = Field(min_length=2, max_length=200)
+    category: str
+    address: str | None = Field(default=None, max_length=300)
+    phone: str | None = Field(default=None, max_length=40)
+    links: list[str] = Field(min_length=1, max_length=5)
+    is_owner: bool = False
+    contact_email: EmailStr | None = None
+    note: str | None = Field(default=None, max_length=2000)
+    # Honeypot: a field people never see. Bots that fill every input end up here.
+    company_website: str | None = None
+
+
+@app.post("/api/v1/submissions", status_code=201)
+def submit_business(session: SessionDep, body: SubmissionIn, request: Request) -> dict[str, str]:
+    """Suggest a business (docs/sources/user-submissions.md). Not shown until approved."""
+    if body.company_website:
+        # Answer like a success so the bot learns nothing; store nothing.
+        return {"id": str(uuid.uuid4()), "status": "pending"}
+    city_row = session.scalar(
+        select(City).where(City.slug == body.city, City.country_code == body.country.upper())
+    )
+    if city_row is None:
+        raise HTTPException(422, f"unknown city: {body.country}/{body.city}")
+    if session.get(Category, body.category) is None:
+        raise HTTPException(422, f"unknown category: {body.category}")
+    links = [u.strip() for u in body.links if u.strip()]
+    if not links or not all(submissions.is_public_link(u) for u in links):
+        raise HTTPException(422, "links must be public http(s) addresses")
+    hashed = submissions.client_hash(request.client.host if request.client else None)
+    if submissions.submissions_today(session, hashed) >= get_settings().submissions_per_day:
+        raise HTTPException(429, "too many submissions today")
+    submission = Submission(
+        city_id=city_row.id,
+        name=body.name.strip(),
+        category_slug=body.category,
+        address=body.address,
+        phone=body.phone,
+        links=links,
+        is_owner=body.is_owner,
+        contact_email=body.contact_email,
+        note=body.note,
+        client_hash=hashed,
+    )
+    submission.detected_score = submissions.detected_score(submission)
+    session.add(submission)
+    session.commit()
+    return {"id": str(submission.id), "status": submission.status}
+
+
+# Imported last: the admin routes reuse the helpers above.
+from farsiyab.admin import router as admin_router  # noqa: E402
+
+app.include_router(admin_router)

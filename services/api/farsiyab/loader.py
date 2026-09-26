@@ -10,10 +10,19 @@ from farsiyab.models import Category, City, Country, Source
 from farsiyab.reference import load_categories, load_cities, load_countries, load_sources
 
 
-def _upsert(session: Session, model: Any, rows: list[dict[str, Any]], key: str) -> None:
+def _upsert(
+    session: Session,
+    model: Any,
+    rows: list[dict[str, Any]],
+    key: str,
+    on_update: dict[str, Any] | None = None,
+) -> None:
+    """Insert or update rows; `on_update` maps a column to (stmt) -> value for updates."""
     for row in rows:
         stmt = insert(model).values(**row)
         updates = {k: stmt.excluded[k] for k in row if k != key}
+        for column, value in (on_update or {}).items():
+            updates[column] = value(stmt)
         session.execute(stmt.on_conflict_do_update(index_elements=[key], set_=updates))
 
 
@@ -84,6 +93,8 @@ def load_reference(session: Session, data_dir: Path | None = None) -> dict[str, 
             for s in sources
         ],
         "id",
+        # A source an admin turned off stays off after a reload.
+        on_update={"enabled": lambda stmt: stmt.excluded.enabled & Source.enabled},
     )
     session.commit()
     return {

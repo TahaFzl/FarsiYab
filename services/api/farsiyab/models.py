@@ -27,6 +27,8 @@ BUSINESS_STATUSES = ("active", "hidden", "removed_by_request", "closed")
 LINK_KINDS = ("website", "facebook", "instagram", "telegram", "phone")
 JOB_STATUSES = ("queued", "running", "done", "failed")
 REPORT_REASONS = ("not_iranian", "closed", "wrong_info", "remove_request")
+REPORT_STATUSES = ("open", "resolved", "dismissed")
+SUBMISSION_STATUSES = ("pending", "approved", "rejected")
 
 
 TZ = DateTime(timezone=True)
@@ -38,7 +40,7 @@ def _in(column: str, values: tuple[str, ...]) -> str:
 
 
 class Base(DeclarativeBase):
-    type_annotation_map = {dict[str, Any]: JSONB}
+    type_annotation_map = {dict[str, Any]: JSONB, list[str]: JSONB}
 
 
 class Country(Base):
@@ -247,6 +249,55 @@ class Report(Base):
     contact_email: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(Text, default="open")
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
+    reviewed_at: Mapped[datetime | None] = mapped_column(TZ)
+    review_note: Mapped[str | None] = mapped_column(Text)
+
+
+class Submission(Base):
+    """A business suggested through the public form; shown only after an admin approves it."""
+
+    __tablename__ = "submission"
+    __table_args__ = (
+        CheckConstraint(_in("status", SUBMISSION_STATUSES), name="status_valid"),
+        Index("ix_submission_status_created", "status", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    city_id: Mapped[int] = mapped_column(ForeignKey("city.id"))
+    name: Mapped[str] = mapped_column(Text)
+    category_slug: Mapped[str] = mapped_column(ForeignKey("category.slug"))
+    address: Mapped[str | None] = mapped_column(Text)
+    phone: Mapped[str | None] = mapped_column(Text)
+    links: Mapped[list[str]] = mapped_column(default=list)
+    is_owner: Mapped[bool] = mapped_column(Boolean, default=False)
+    contact_email: Mapped[str | None] = mapped_column(Text)
+    note: Mapped[str | None] = mapped_column(Text)
+    detected_score: Mapped[float] = mapped_column(Float, default=0.0)
+    # sha256(secret, day, client address): enough for a daily rate limit, useless after that.
+    client_hash: Mapped[str | None] = mapped_column(Text, index=True)
+    status: Mapped[str] = mapped_column(Text, default="pending")
+    business_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("business.id", ondelete="SET NULL")
+    )
+    review_note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
+    reviewed_at: Mapped[datetime | None] = mapped_column(TZ)
+
+
+class Label(Base):
+    """A person's verdict on one business, used to measure detector precision."""
+
+    __tablename__ = "label"
+
+    business_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("business.id", ondelete="CASCADE"), primary_key=True
+    )
+    is_iranian: Mapped[bool] = mapped_column(Boolean)
+    note: Mapped[str | None] = mapped_column(Text)
+    labeled_by: Mapped[str] = mapped_column(Text)
+    # Kept so precision can be computed for the score the business had when labeled.
+    score_at_label: Mapped[float] = mapped_column(Float)
+    labeled_at: Mapped[datetime] = mapped_column(TZ, server_default=NOW())
 
 
 class GeocodeCache(Base):

@@ -138,9 +138,9 @@ sources:
     license: submitter consent
     storage: full
     refresh: continuous
-    status: planned
+    status: mvp
     phase: 4
-    tested: false
+    tested: true
     signals: [user_submission_verified]
     doc: docs/sources/user-submissions.md
 

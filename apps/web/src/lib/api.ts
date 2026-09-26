@@ -102,7 +102,7 @@ export class ApiError extends Error {
   }
 }
 
-function serverBase(): string {
+export function serverBase(): string {
   return process.env.FARSIYAB_API_URL ?? "http://127.0.0.1:8000";
 }
 
@@ -138,6 +138,7 @@ export const browserApi = {
   cities: (country: string, lang: Locale) => `/api/v1/countries/${country}/cities?lang=${lang}`,
   jobStream: (jobId: string) => `/api/v1/search/jobs/${jobId}/stream`,
   report: (businessId: string) => `/api/v1/businesses/${businessId}/reports`,
+  submissions: "/api/v1/submissions",
 };
 
 export type CategoryOption = { slug: string; name: string };

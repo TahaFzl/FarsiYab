@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 
-import { browserApi, searchHref, type CategoryOption, type CityOption, type Country } from "@/lib/api";
+import { useCities } from "@/hooks/useCities";
+import { searchHref, type CategoryOption, type CityOption, type Country } from "@/lib/api";
 import type { Locale } from "@/lib/i18n";
 
 export interface SearchFormText {
@@ -32,31 +33,16 @@ export function SearchForm({ lang, text, countries, categories, initial, compact
   const router = useRouter();
   const [country, setCountry] = useState(initial?.country ?? "");
   const [city, setCity] = useState(initial?.city ?? "");
-  const [cities, setCities] = useState<CityOption[]>(initial?.cities ?? []);
-  const [loadedFor, setLoadedFor] = useState(initial?.cities.length ? initial.country : "");
+  const { cities, loading: loadingCities } = useCities(
+    country,
+    lang,
+    initial?.cities,
+    useCallback((data: CityOption[]) => {
+      if (data.length === 1) setCity(data[0].slug);
+    }, []),
+  );
   const [selected, setSelected] = useState<string[]>(initial?.categories ?? []);
   const [error, setError] = useState("");
-
-  const loadingCities = country !== "" && loadedFor !== country;
-
-  useEffect(() => {
-    if (!country || loadedFor === country) return;
-    let cancelled = false;
-    fetch(browserApi.cities(country, lang))
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: CityOption[]) => {
-        if (cancelled) return;
-        setCities(data);
-        setLoadedFor(country);
-        if (data.length === 1) setCity(data[0].slug);
-      })
-      .catch(() => {
-        if (!cancelled) setLoadedFor(country);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [country, lang, loadedFor]);
 
   function toggle(slug: string) {
     setSelected((current) =>
@@ -89,7 +75,6 @@ export function SearchForm({ lang, text, countries, categories, initial, compact
             onChange={(e) => {
               setCountry(e.target.value);
               setCity("");
-              setCities([]);
               setError("");
             }}
           >

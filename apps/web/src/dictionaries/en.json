@@ -9,7 +9,8 @@
     "howItWorks": "How it works",
     "about": "About",
     "privacy": "Privacy",
-    "switchLanguage": "فارسی"
+    "switchLanguage": "فارسی",
+    "submit": "Add a business"
   },
   "form": {
     "country": "Country",
@@ -39,7 +40,8 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page {page} of {pages}",
-    "error": "Could not reach the server. Please try again in a moment."
+    "error": "Could not reach the server. Please try again in a moment.",
+    "suggest": "Know a business that is missing? Add it"
   },
   "live": {
     "queued": "Preparing a fresh search for this city…",
@@ -93,5 +95,148 @@
     "overture": "Overture Maps",
     "osm": "OpenStreetMap",
     "website": "Business websites"
+  },
+  "submit": {
+    "title": "Add a business",
+    "intro": "Know an Iranian or Persian-speaking business that FarsiYab is missing? Tell us about it. It will be shown after we review it.",
+    "country": "Country",
+    "city": "City",
+    "chooseCountry": "Choose a country",
+    "chooseCity": "Choose a city",
+    "loadingCities": "Loading cities…",
+    "name": "Business name",
+    "nameHint": "As on its sign or page, in Persian or Latin script",
+    "category": "Category",
+    "chooseCategory": "Choose a category",
+    "address": "Address",
+    "addressHint": "Leave empty for online or home-based businesses",
+    "phone": "Phone",
+    "links": "Public links",
+    "linksHint": "At least one: website, Instagram, Facebook or a Google Maps page. This link is the evidence shown to users.",
+    "addLink": "Another link",
+    "owner": "I own this business",
+    "email": "Your email (optional)",
+    "emailHint": "Only to ask about this submission; never shown.",
+    "note": "Note (optional)",
+    "consent": "Once approved, the details above are shown publicly. Please do not enter personal information such as the owner's name.",
+    "send": "Send for review",
+    "sending": "Sending…",
+    "sent": "Thank you! We received it and will show it after review.",
+    "sendAnother": "Add another business",
+    "failed": "Could not send. Please try again.",
+    "tooMany": "You have reached today's limit. Please try again tomorrow.",
+    "invalid": "Some details are not valid. Links must start with https://."
+  },
+  "admin": {
+    "title": "Admin",
+    "login": {
+      "title": "Admin sign-in",
+      "token": "Admin token",
+      "submit": "Sign in",
+      "hint": "The FARSIYAB_ADMIN_TOKEN value on the server.",
+      "wrong": "Wrong token.",
+      "disabled": "The admin panel is off: FARSIYAB_ADMIN_TOKEN is not set on the server.",
+      "down": "Cannot reach the API."
+    },
+    "nav": {
+      "overview": "Overview",
+      "submissions": "Submissions",
+      "reports": "Reports",
+      "labels": "Labeling",
+      "sources": "Sources",
+      "logout": "Sign out"
+    },
+    "overview": {
+      "pending": "Pending submissions",
+      "reports": "Open reports",
+      "hidden": "Hidden",
+      "labels": "Labeled",
+      "cities": "Cities",
+      "city": "City",
+      "lastIndexed": "Last indexed",
+      "shown": "Shown",
+      "failed": "Failed sources",
+      "never": "never",
+      "indexNow": "Index",
+      "jobs": "Recent jobs",
+      "status": "Status",
+      "created": "Created",
+      "none": "none",
+      "precision": "Detector precision"
+    },
+    "submissions": {
+      "none": "No new submissions.",
+      "owner": "Owner",
+      "community": "Community",
+      "score": "Name score",
+      "duplicate": "Probably already known:",
+      "approve": "Approve and show",
+      "reject": "Reject",
+      "note": "Note (optional)",
+      "contact": "Contact",
+      "noteFrom": "Submitter's note"
+    },
+    "reports": {
+      "none": "No open reports.",
+      "reasons": {
+        "not_iranian": "Not Iranian",
+        "closed": "Closed",
+        "wrong_info": "Wrong information",
+        "remove_request": "Removal request"
+      },
+      "actions": {
+        "dismiss": "Dismiss",
+        "hide": "Hide",
+        "restore": "Show again",
+        "close": "Closed",
+        "remove": "Remove for good"
+      },
+      "removeHint": "\"Remove for good\" puts the business's links on the do-not-index list so no source brings it back.",
+      "note": "Note (optional)",
+      "hidden": "Hidden businesses"
+    },
+    "labels": {
+      "hint": "Is this business really Iranian or Persian-speaking? Judge from the evidence and links; open them when unsure.",
+      "yes": "Yes, Iranian",
+      "no": "No, not Iranian",
+      "note": "Note (optional)",
+      "by": "Labeler name",
+      "done": "Everything in this filter is labeled.",
+      "level": "Level",
+      "labeled": "Labeled",
+      "iranian": "Iranian",
+      "precision": "Precision",
+      "ci": "95% interval",
+      "goal": "Phase 4 goal: precision of at least {goal} for \"high\" and \"medium\", with {target} samples per level",
+      "combined": "High + medium",
+      "met": "✅ Goal met",
+      "notMet": "Goal not met yet",
+      "allCities": "All cities",
+      "city": "City",
+      "filter": "Apply"
+    },
+    "sources": {
+      "name": "Source",
+      "status": "Status",
+      "enabled": "Enabled",
+      "on": "on",
+      "off": "off",
+      "enable": "Turn on",
+      "disable": "Turn off",
+      "lastRuns": "Last run per city",
+      "accountRequired": "needs an account"
+    },
+    "statuses": {
+      "active": "active",
+      "hidden": "hidden",
+      "closed": "closed",
+      "removed_by_request": "removed on request"
+    },
+    "jobStatuses": {
+      "queued": "queued",
+      "running": "running",
+      "done": "done",
+      "failed": "failed"
+    }
   }
 }

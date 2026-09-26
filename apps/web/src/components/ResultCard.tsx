@@ -39,9 +39,11 @@ interface Props {
   lang: Locale;
   dict: Dictionary;
   categoryNames: Record<string, string>;
+  /** Replaces the report button (the admin panel puts its review buttons here). */
+  actions?: React.ReactNode;
 }
 
-export function ResultCard({ result, lang, dict, categoryNames }: Props) {
+export function ResultCard({ result, lang, dict, categoryNames, actions }: Props) {
   const t = dict.card;
   const title = lang === "fa" ? result.name.fa ?? result.name.latin : result.name.latin ?? result.name.fa;
   const subtitle = title === result.name.fa ? result.name.latin : result.name.fa;
@@ -132,7 +134,9 @@ export function ResultCard({ result, lang, dict, categoryNames }: Props) {
         </span>
         <span className="flex items-center gap-3">
           <span>{fill(t.verified, { date: formatDate(lang, result.last_verified_at) })}</span>
-          <ReportButton businessId={result.id} name={title ?? ""} text={dict.report} buttonLabel={t.report} />
+          {actions ?? (
+            <ReportButton businessId={result.id} name={title ?? ""} text={dict.report} buttonLabel={t.report} />
+          )}
         </span>
       </footer>
     </article>

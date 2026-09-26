@@ -206,6 +206,7 @@ function Filters({
 }
 
 function EmptyState({
+  lang,
   dict,
   requested,
   city,
@@ -224,6 +225,11 @@ function EmptyState({
         <a href={google} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
           Google Maps ↗
         </a>
+      </p>
+      <p className="text-sm">
+        <Link href={`/${lang}/submit`} className="text-primary hover:underline">
+          {dict.results.suggest}
+        </Link>
       </p>
     </div>
   );

@@ -34,6 +34,10 @@ export default async function Privacy({ params }: PageProps<"/[lang]/privacy">) 
           <ul>
             <li>حساب کاربری وجود ندارد و کوکی ردیابی استفاده نمی‌کنیم.</li>
             <li>آدرس IP در دیتابیس ذخیره نمی‌شود. فقط در لاگ‌های وب‌سرور ثبت می‌شود و این لاگ‌ها حداکثر بعد از ۷ روز پاک می‌شوند.</li>
+            <li>
+              وقتی کسب‌وکاری را ثبت می‌کنید، برای جلوگیری از اسپم فقط یک اثر یک‌طرفه (hash) از آدرس IP شما نگه داشته
+              می‌شود. این hash با یک کلید مخفی ساخته می‌شود و هر روز عوض می‌شود، پس ثبت‌های روزهای مختلف به هم ربط داده نمی‌شوند.
+            </li>
             <li>ایمیلی که در گزارش وارد می‌کنید فقط برای پیگیری همان گزارش استفاده می‌شود.</li>
           </ul>
         </>
@@ -56,6 +60,10 @@ export default async function Privacy({ params }: PageProps<"/[lang]/privacy">) 
           <ul>
             <li>There are no user accounts and no tracking cookies.</li>
             <li>IP addresses are not stored in our database. They appear only in web server logs, which are deleted after at most 7 days.</li>
+            <li>
+              When you add a business, only a keyed one-way hash of your IP address is kept, to limit spam. The hash
+              changes every day, so submissions from different days cannot be linked.
+            </li>
             <li>An email you enter in a report is used only to follow up on that report.</li>
           </ul>
         </>

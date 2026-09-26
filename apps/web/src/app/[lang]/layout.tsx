@@ -49,6 +49,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
               <Link href={`/${lang}`} className="hover:text-foreground">
                 {dict.nav.search}
               </Link>
+              <Link href={`/${lang}/submit`} className="hover:text-foreground">
+                {dict.nav.submit}
+              </Link>
               <Link href={`/${lang}/how-it-works`} className="hover:text-foreground">
                 {dict.nav.howItWorks}
               </Link>

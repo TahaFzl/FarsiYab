@@ -1,0 +1,8 @@
+# Arabic words a Persian business name would not use (Persian: رستوران، شیرینی، مشاوره).
+# A negative signal only when the same text has no explicit Iranian word, so
+# "مطعم إيراني" (an Iranian restaurant, in Arabic) stays.
+# Phase 5 spot check: Dubai restaurants typed with Persian yeh ("مطعم مکلا الجدید").
+مطعم
+مطاعم
+حلويات
+للاستشارات

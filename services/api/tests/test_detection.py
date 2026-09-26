@@ -165,3 +165,20 @@ def test_persan_is_not_evidence_in_turkey():
 def test_pashto_possessive_particle():
     assert script.classify("د عبدالرحمن خان هوایی سفرونه") == script.Script.OTHER
     assert script.classify("کباب دربند") != script.Script.OTHER  # د inside a word
+
+
+def test_page_keywords_follow_country_exclusions():
+    from farsiyab.detection.signals import make
+    from farsiyab.indexer import drop_excluded_keywords
+
+    persan = make("explicit_keyword", 'Anasayfa - Persan "Cookie, Kurabiye"', None)
+    persian = make("explicit_keyword", "Persian restaurant in Kadıköy", None)
+    assert drop_excluded_keywords([persan, persian], "TR") == [persian]
+    assert drop_excluded_keywords([persan], "FR") == [persan]
+
+
+def test_arabic_business_words_are_negative_unless_iranian_is_said():
+    arabic = detect([TextField("name", "مطعم مکلا الجدید", None)])
+    assert "negative_keyword" in [s.signal for s in arabic] and score(arabic) < 0.45
+    iranian = detect([TextField("name", "مطعم إيراني", None)])
+    assert [s.signal for s in iranian] == ["explicit_keyword"]

@@ -60,6 +60,8 @@ class Lexicons:
     occasions: re.Pattern[str]
     negative: re.Pattern[str]
     surname_suffixes: tuple[str, ...]
+    # Negative only when the same text has no explicit keyword (arabic_markers.txt).
+    arabic_markers: re.Pattern[str] = re.compile(r"(?!x)x")
 
 
 def load_lexicons(directory: Path) -> Lexicons:
@@ -76,6 +78,7 @@ def load_lexicons(directory: Path) -> Lexicons:
         foods=pattern("persian_foods.txt"),
         occasions=pattern("occasions.txt"),
         negative=pattern("negative_keywords.txt"),
+        arabic_markers=pattern("arabic_markers.txt"),
         surname_suffixes=tuple(read_terms(directory / "surname_suffixes.txt")),
     )
 

@@ -17,7 +17,13 @@ from farsiyab.adapters.telegram import TelegramChecker
 from farsiyab.adapters.website import WebsiteChecker, WebsiteResult
 from farsiyab.config import Settings, get_settings
 from farsiyab.detection import script
-from farsiyab.detection.detector import confidence_label, detect, has_positive, score
+from farsiyab.detection.detector import (
+    TextField,
+    confidence_label,
+    detect,
+    has_positive,
+    score,
+)
 from farsiyab.detection.signals import Signal
 from farsiyab.display import threshold_for
 from farsiyab.links import Link, classify_url, phone_link, website_link
@@ -311,7 +317,22 @@ def website_candidates(
     return list(first.items())
 
 
-def store_website_result(session: Session, business_id: uuid.UUID, result: WebsiteResult) -> None:
+def drop_excluded_keywords(signals: list[Signal], country: str) -> list[Signal]:
+    """Page checks run without knowing the country; drop keyword signals whose snippet
+    only holds a word excluded there (country_exclusions.yaml, e.g. "Persan" in Turkey)."""
+    kept = []
+    for signal in signals:
+        if signal.signal == "explicit_keyword":
+            again = detect([TextField("page_head", signal.snippet, signal.url)], country=country)
+            if "explicit_keyword" not in {s.signal for s in again}:
+                continue
+        kept.append(signal)
+    return kept
+
+
+def store_website_result(
+    session: Session, business_id: uuid.UUID, result: WebsiteResult, country: str | None = None
+) -> None:
     business = session.get(Business, business_id)
     if result.retryable:
         return  # try again on the next index run
@@ -320,12 +341,13 @@ def store_website_result(session: Session, business_id: uuid.UUID, result: Websi
         return
     link = website_link(result.final_url or result.url)
     external_id = link.url if link else (result.final_url or result.url)
-    if result.signals:
+    signals = drop_excluded_keywords(result.signals, country) if country else result.signals
+    if signals:
         record = _upsert_record(
             session, business_id, "website", external_id, result.final_url,
             {"lang": result.lang, "title": result.title},
         )
-        _replace_evidence(session, record, result.signals)
+        _replace_evidence(session, record, signals)
     _add_links(session, business_id, result.links)
 
 
@@ -352,7 +374,7 @@ def check_websites(
     results = asyncio.run(_check_all([url for _, url in candidates], checker_factory))
     outcome: Counter[str] = Counter()
     for (business_id, _), result in zip(candidates, results, strict=True):
-        store_website_result(session, business_id, result)
+        store_website_result(session, business_id, result, city.country_code)
         if result.ok:
             outcome["with_evidence" if result.signals else "no_evidence"] += 1
         else:
@@ -406,10 +428,11 @@ def check_telegram(
         if not result.ok or not result.exists:
             outcome["not_found"] += 1
             continue
-        if result.signals:
+        signals = drop_excluded_keywords(result.signals, city.country_code)
+        if signals:
             record = _upsert_record(session, business_id, "telegram", name, result.url,
                                     {"title": result.title})
-            _replace_evidence(session, record, result.signals)
+            _replace_evidence(session, record, signals)
             outcome["with_evidence"] += 1
         else:
             outcome["no_evidence"] += 1

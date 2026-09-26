@@ -86,6 +86,10 @@ def _keyword_signals(field: TextField, lex: Lexicons) -> list[Signal]:
         m = pattern.search(norm)
         if m:
             found.append(make(signal, _context(text, *m.span()), field.url))
+    if not matches and not any(s.signal == "negative_keyword" for s in found):
+        m = lex.arabic_markers.search(norm)
+        if m and field.kind != "page":
+            found.append(make("negative_keyword", _context(text, *m.span()), field.url))
     m = lex.places_ambiguous.search(norm)
     if m:
         found.append(make("iranian_place_name", _context(text, *m.span()), field.url,
